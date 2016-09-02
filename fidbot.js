@@ -19,24 +19,35 @@ fidbot.on('message', function(message){
 	var roles = server.roles;
 	var serverConfig = serverConfigs[server.id] || serverConfigs[DEFAULTSERVERNAME];
 
-	if (messageContent.slice(0, 5) === '/dice') {
-		var dice = new Dice(serverConfig.dice);
-		fidbot.sendMessage(message.channel, dice.eval(messageContent.slice(6)));
-	} else if (messageContent.slice(0, 14) === '/configureDice') {
-		var roleDiceMaster = roles.get('name', 'DiceMaster');
+	if (messageContent.charAt(0) === '/') {
+		var command = messageContent.slice(1, messageContent.indexOf(' '));
+		var parameters = messageContent.slice(command.length + 2);
+		switch (command) {
+			case 'dice':
+				var dice = new Dice(serverConfig.dice);
+				fidbot.sendMessage(message.channel, dice.eval(parameters));
+				break;
+			case 'configureDice':
+				var roleDiceMaster = roles.get('name', 'DiceMaster');
 
-		if (roleDiceMaster && message.author.hasRole(roleDiceMaster)) {
-			confirmServerHasOwnConfig(server.id);
-			serverConfigs[server.id].dice = {
-				maxCount: parseInt(messageContent.slice(15), 10)
-			};
-			saveServerConfigs();
-			fidbot.reply(message, 'Dice reconfigured!');
-		} else {
-			fidbot.reply(message, "I'm afraid I can't let you do that.");
+				if (roleDiceMaster && message.author.hasRole(roleDiceMaster)) {
+					confirmServerHasOwnConfig(server.id);
+					serverConfigs[server.id].dice = {
+						maxCount: parseInt(parameters, 10)
+					};
+					saveServerConfigs();
+					fidbot.reply(message, 'Dice reconfigured!');
+				} else {
+					fidbot.reply(message, "I'm afraid I can't let you do that.");
+				}
+				break;
+			default:
+			// fidbot.reply(message, "I didn't quite catch that I'm afraid.");
 		}
-	} else if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
-		fidbot.sendMessage(message.channel, 'A slut! A SLUUUUUUTTTTT!');
+	} else {
+		if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
+			fidbot.sendMessage(message.channel, 'A slut! A SLUUUUUUTTTTT!');
+		}
 	}
 });
 
