@@ -9,9 +9,12 @@ var dice = new Dice({
 });
 
 fidbot.on('message', function(message){
-	if (message.content.slice(0, 5) === '/dice') {
-		fidbot.sendMessage(message.channel, dice.eval(message.content.slice(6)));
+	var messageContent = message.content;
+	if (messageContent.slice(0, 5) === '/dice') {
+		fidbot.sendMessage(message.channel, dice.eval(messageContent.slice(6)));
+	} else if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
+		fidbot.sendMessage(message.channel, 'A slut! A SLUUUUUUTTTTT!');
 	}
 });
 
-fidbot.loginWithToken('token redacted');
+fidbot.loginWithToken('MjIxMzMzMzA1MjAxNjU1ODA5.CqtUOA.HaFWJm4Po5RgHHZ43IC6YMQd7qw');
