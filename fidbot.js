@@ -82,8 +82,12 @@ fidbot.on('message', function(message){
 					for (; count > 0; count--) {
 						trailingExclamationMarks += '!';
 					}
+					var determiner = 'a';
+					if (/[aeiou]/i.test(callSlur.charAt(0))) {
+						determiner = 'an';
+					}
 
-					fidbot.sendMessage(message.channel, callName + ' is a ' + callSlur + '! A ' + yellNoun + trailingExclamationMarks);
+					fidbot.sendMessage(message.channel, callName + ' is ' + determiner + ' ' + callSlur + '! ' + determiner.toUpperCase() + ' ' + yellNoun + trailingExclamationMarks);
 				} else {
 					fidbot.reply(message, "that was a malformed accusation!");
 				}
