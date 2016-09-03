@@ -56,7 +56,7 @@ fidbot.on('message', function(message){
 				break;
 			case 'call':
 				parameters = parameters.replace(/\n.*/g, '');
-				var splitPoint = parameters.toLowerCase().indexOf(' a ');
+				var splitPoint = parameters.search(/ an? /i);
 				var callName, callSlur;
 				if (splitPoint > 0) {
 					callName = parameters.slice(0, splitPoint).trim();
