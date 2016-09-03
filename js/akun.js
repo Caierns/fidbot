@@ -35,7 +35,7 @@ Akun.prototype.eval = function(inputString, callback){
 								output += '\n';
 							}
 						} else {
-							output += story['t'];
+							output += story['t'].replace('<br>', '');
 							if (storyIndex < json['stories'].length - 1) {
 								output += ', ';
 							}
