@@ -3,6 +3,7 @@
 var fs = require('fs');
 var Discord = require('discord.js');
 var Dice = require('./js/dice.js');
+var akun = require('./js/akun.js');
 
 var fidbot = new Discord.Client();
 var serverConfigs = {};
@@ -40,6 +41,12 @@ fidbot.on('message', function(message){
 				} else {
 					fidbot.reply(message, "I'm afraid I can't let you do that.");
 				}
+				break;
+			case 'akun':
+			case 'anonkun':
+				akun.eval(parameters, function(output){
+					fidbot.sendMessage(message.channel, output);
+				});
 				break;
 			default:
 			// fidbot.reply(message, "I didn't quite catch that I'm afraid.");
