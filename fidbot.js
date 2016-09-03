@@ -99,8 +99,11 @@ fidbot.on('message', function(message){
 					case 'dice':
 						fidbot.sendMessage(message.channel, 'Roll dice like you\'re on Akun. Dice are going to undergo a rewrite to expand functionality though, syntax might change after that.');
 						break;
+					case 'wide':
+						fidbot.sendMessage(message.channel, 'Use `/wide <text>` to make Fidbot say <ｔｅｘｔ>.');
+						break;
 					default:
-						fidbot.sendMessage(message.channel, 'Fidbot currently offers a limited selection of functionality. Type `/help <command>` to find out more about them.\nFollowing commands currently supported: `akun`, `dice`, `call`');
+						fidbot.sendMessage(message.channel, 'Fidbot currently offers a limited selection of functionality. Type `/help <command>` to find out more about them.\nFollowing commands currently supported: `akun`, `dice`, `call`, `wide`');
 				}
 				break;
 			case 'kys':
