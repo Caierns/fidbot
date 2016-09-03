@@ -63,7 +63,7 @@ fidbot.on('message', function(message){
 					callSlur = parameters.slice(splitPoint + 3).trim();
 				}
 				if (callName && callSlur) {
-					callName = callName.charAt(0).toUpperCase() + callName.slice(1).toLowerCase();
+					callName = callName.charAt(0).toUpperCase() + callName.slice(1);
 					if (callName === 'Fidbot' || callName === '<@' + fidbotId + '>') {
 						callSlur = 'wonderful creation';
 					}
