@@ -1,10 +1,14 @@
 'use strict';
 
+var RollSum = require('./rollSum.js');
+
 var Dice = function(options){
 	this._MAXCOUNT = options.maxCount || 100;
+	this.error = false; // Set a flag to indicate the input is invalid
+	this.errorMessage = '';
 };
 
-Dice.prototype.eval = function(inputString){
+Dice.prototype.evalAkun = function(inputString){
 	var values = inputString.match(/([0-9]+)d([0-9]+)([\-\+][0-9]+)?\s?([0-9sfxiv,-]+)?/i);
 
 	if (values === null) {
@@ -285,6 +289,25 @@ Dice.prototype.eval = function(inputString){
 	}
 
 	return output;
+};
+
+Dice.prototype.eval = function(inputString){
+	var rollSum = new RollSum(inputString);
+	if (rollSum.error) {
+		this.error = rollSum.error;
+		this.errorMessage = rollSum.errorMessage;
+		return;
+	}
+
+	rollSum.executeDice();
+	var outputString = rollSum.toString();
+	if (rollSum.isTypeSuccess()) {
+		outputString += ' = ' + rollSum.getSuccesses() + ' Successes';
+	} else {
+		outputString += ' = ' + rollSum.getSum();
+	}
+
+	return outputString;
 };
 
 module.exports = Dice;

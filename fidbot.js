@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var Discord = require('discord.js');
-var Dice = require('./js/dice.js');
+var Dice = require('./js/dice/dice.js');
 var akun = require('./js/akun.js');
 
 var fidbot = new Discord.Client();
@@ -32,7 +32,29 @@ fidbot.on('message', function(message){
 		switch (command) {
 			case 'dice':
 				var dice = new Dice(serverConfig.dice);
-				fidbot.sendMessage(message.channel, dice.eval(parameters));
+				fidbot.sendMessage(message.channel, dice.evalAkun(parameters));
+				break;
+			case 'roll':
+				var roll = new Dice(serverConfig.dice);
+
+				// First split off any trailing comment. The dice command should be a single word, so first space is where to split
+				var inputCommand, trailingComment;
+				var commentSplitIndex = parameters.indexOf(' ');
+				if (commentSplitIndex > -1) {
+					inputCommand = parameters.slice(0, commentSplitIndex);
+					trailingComment = ' ' + parameters.slice(commentSplitIndex).trim();
+				} else {
+					inputCommand = parameters;
+					trailingComment = '';
+				}
+
+				var rollOutput = roll.eval(inputCommand.trim());
+				if (roll.error) {
+					fidbot.sendMessage(message.channel, roll.errorMessage);
+				} else {
+					fidbot.sendMessage(message.channel, rollOutput + trailingComment);
+				}
+
 				break;
 			case 'configureDice':
 				var roleDiceMaster = getRole(server, 'DiceMaster');
