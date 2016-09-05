@@ -12,19 +12,19 @@ class Roll {
 	constructor(inputString, options){
 		this._options = options;
 
-		this.error = false; // Set a flag to indicate the input is invalid
-		this.errorMessage = '';
+		this._error = false; // Set a flag to indicate the input is invalid
+		this._errorMessage = '';
 
 		var matchParams = /([0-9]+)d([0-9F]+)(.*)/.exec(inputString);
 		if (matchParams === null) {
-			this.error = true;
-			this.errorMessage = 'Error: invalid roll command.';
+			this._error = true;
+			this._errorMessage = 'Error: invalid roll command.';
 			return;
 		}
 		this._diceCount = parseInt(matchParams[1], 10);
 		if (this._diceCount > this._options.maxCount) {
-			this.error = true;
-			this.errorMessage = 'Error: max number of dice exceeded.';
+			this._error = true;
+			this._errorMessage = 'Error: max number of dice exceeded.';
 			return;
 		}
 		this._isFateDice = matchParams[2] === 'F';
@@ -43,6 +43,141 @@ class Roll {
 		this._successes = 0;
 	}
 
+	get error(){
+		return this._error;
+	}
+
+	get errorMessage(){
+		return this._errorMessage;
+	}
+
+	get diceCount(){
+		return this._diceCount;
+	}
+
+	get isTypeSuccess(){
+		return this._isTypeSuccess;
+	}
+
+	get sum(){
+		return this._sum;
+	}
+
+	get successes(){
+		return this._successes;
+	}
+
+	'_mod_'(matchMod){
+		this['_mod_s'](matchMod);
+	}
+
+	'_mod_s'(matchMod){
+		if (!isNaN(matchMod[3])) {
+			this._initialiseSuccessRange();
+			switch (matchMod[2]) {
+				case '>':
+					this._s.addGreaterThan(matchMod[3]);
+					break;
+				case '<':
+					this._s.addLessThan(matchMod[3]);
+					break;
+				case '=':
+					this._s.addSpecificEquality(matchMod[3]);
+					break;
+			}
+		}
+	}
+
+	'_mod_f'(matchMod){
+		if (!isNaN(matchMod[3])) {
+			this._initialiseSuccessRange();
+			switch (matchMod[2]) {
+				case '>':
+					this._f.addGreaterThan(matchMod[3]);
+					break;
+				case '<':
+					this._f.addLessThan(matchMod[3]);
+					break;
+				case '=':
+					this._f.addSpecificEquality(matchMod[3]);
+					break;
+			}
+		}
+	}
+
+	'_mod_cs'(matchMod){
+		if (!isNaN(matchMod[3])) {
+			this._initialiseSuccessRange();
+			switch (matchMod[2]) {
+				case '>':
+					this._cs.addGreaterThan(matchMod[3]);
+					break;
+				case '<':
+					this._cs.addLessThan(matchMod[3]);
+					break;
+				case '=':
+					this._cs.addSpecificEquality(matchMod[3]);
+					break;
+			}
+		}
+	}
+
+	'_mod_cf'(matchMod){
+		if (!isNaN(matchMod[3])) {
+			this._initialiseSuccessRange();
+			switch (matchMod[2]) {
+				case '>':
+					this._cf.addGreaterThan(matchMod[3]);
+					break;
+				case '<':
+					this._cf.addLessThan(matchMod[3]);
+					break;
+				case '=':
+					this._cf.addSpecificEquality(matchMod[3]);
+					break;
+			}
+		}
+	}
+
+	'_mod_!'(matchMod){
+	}
+
+	'_mod_!!'(matchMod){
+	}
+
+	'_mod_!p'(matchMod){
+	}
+
+	'_mod_k'(matchMod){
+	}
+
+	'_mod_kh'(matchMod){
+	}
+
+	'_mod_kl'(matchMod){
+	}
+
+	'_mod_d'(matchMod){
+	}
+
+	'_mod_dh'(matchMod){
+	}
+
+	'_mod_dl'(matchMod){
+	}
+
+	'_mod_r'(matchMod){
+	}
+
+	'_mod_ro'(matchMod){
+	}
+
+	'_mod_sa'(matchMod){
+	}
+
+	'_mod_sd'(matchMod){
+	}
+
 	_parseMods(modString){
 		if (modString !== '') {
 			var modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
@@ -50,99 +185,7 @@ class Roll {
 			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '') {
 				matchMod[2] = matchMod[2] || '=';
 				matchMod[3] = parseInt(matchMod[3], 10);
-				switch (matchMod[1]) {
-					case '':
-					case 's':
-						if (!isNaN(matchMod[3])) {
-							this._initialiseSuccessRange();
-							switch (matchMod[2]) {
-								case '>':
-									this._s.addGreaterThan(matchMod[3]);
-									break;
-								case '<':
-									this._s.addLessThan(matchMod[3]);
-									break;
-								case '=':
-									this._s.addSpecificEquality(matchMod[3]);
-									break;
-							}
-						}
-						break;
-					case 'f':
-						if (!isNaN(matchMod[3])) {
-							this._initialiseSuccessRange();
-							switch (matchMod[2]) {
-								case '>':
-									this._f.addGreaterThan(matchMod[3]);
-									break;
-								case '<':
-									this._f.addLessThan(matchMod[3]);
-									break;
-								case '=':
-									this._f.addSpecificEquality(matchMod[3]);
-									break;
-							}
-						}
-						break;
-					case 'cs':
-						if (!isNaN(matchMod[3])) {
-							this._initialiseSuccessRange();
-							switch (matchMod[2]) {
-								case '>':
-									this._cs.addGreaterThan(matchMod[3]);
-									break;
-								case '<':
-									this._cs.addLessThan(matchMod[3]);
-									break;
-								case '=':
-									this._cs.addSpecificEquality(matchMod[3]);
-									break;
-							}
-						}
-						break;
-					case 'cf':
-						if (!isNaN(matchMod[3])) {
-							this._initialiseSuccessRange();
-							switch (matchMod[2]) {
-								case '>':
-									this._cf.addGreaterThan(matchMod[3]);
-									break;
-								case '<':
-									this._cf.addLessThan(matchMod[3]);
-									break;
-								case '=':
-									this._cf.addSpecificEquality(matchMod[3]);
-									break;
-							}
-						}
-						break;
-					case '!':
-						break;
-					case '!!':
-						break;
-					case '!p':
-						break;
-					case 'k':
-						break;
-					case 'kh':
-						break;
-					case 'kl':
-						break;
-					case 'd':
-						break;
-					case 'dh':
-						break;
-					case 'dl':
-						break;
-					case 'r':
-						break;
-					case 'ro':
-						break;
-					case 'sa':
-						break;
-					case 'sd':
-						break;
-				}
+				this['_mod_' + matchMod[1]](matchMod);
 			}
 		}
 	}
@@ -216,18 +259,6 @@ class Roll {
 		} else {
 			this._sumResults();
 		}
-	}
-
-	get isTypeSuccess(){
-		return this._isTypeSuccess;
-	}
-
-	get sum(){
-		return this._sum;
-	}
-
-	get successes(){
-		return this._successes;
 	}
 
 	toString(){
