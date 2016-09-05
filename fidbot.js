@@ -63,7 +63,7 @@ fidbot.on('message', function(message){
 					trailingComment = '';
 				}
 
-				var rollOutput = roll.eval(inputCommand.trim());
+				var rollOutput = roll.evalRoll20(inputCommand.trim());
 				if (roll.error) {
 					message.channel.sendMessage(roll.errorMessage);
 				} else {

@@ -218,15 +218,15 @@ class Roll {
 		}
 	}
 
-	isTypeSuccess(){
+	get isTypeSuccess(){
 		return this._isTypeSuccess;
 	}
 
-	getSum(){
+	get sum(){
 		return this._sum;
 	}
 
-	getSuccesses(){
+	get successes(){
 		return this._successes;
 	}
 
