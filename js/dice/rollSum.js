@@ -1,7 +1,9 @@
 'use strict';
 var Roll = require('./roll.js');
 
-var RollSum = function(inputString){
+var RollSum = function(inputString, options){
+	this._options = options;
+
 	var rollArray = [];
 	var braceOpen = 0;
 	var lastPlusIndex = 0;
@@ -17,18 +19,18 @@ var RollSum = function(inputString){
 		if (char === '+' && braceOpen === 0) {
 			splitString = inputString.slice(lastPlusIndex, charIndex);
 			if (splitString.charAt(0) === '{') {
-				rollArray.push(new RollGroup(splitString));
+				rollArray.push(new RollGroup(splitString, this._options));
 			} else {
-				rollArray.push(new Roll(splitString));
+				rollArray.push(new Roll(splitString, this._options));
 			}
 			lastPlusIndex = charIndex + 1;
 		}
 	}
 	splitString = inputString.slice(lastPlusIndex);
 	if (splitString.charAt(0) === '{') {
-		rollArray.push(new RollGroup(splitString));
+		rollArray.push(new RollGroup(splitString, this._options));
 	} else {
-		rollArray.push(new Roll(splitString));
+		rollArray.push(new Roll(splitString, this._options));
 	}
 
 	this._members = rollArray;
@@ -90,7 +92,9 @@ RollSum.prototype.toString = function(){
 	return outputString;
 };
 
-var RollGroup = function(inputString){
+var RollGroup = function(inputString, options){
+	this._options = options;
+
 	this.error = true;
 	this.errorMessage = 'Error: grouped rolls not yet supported.';
 	return;
@@ -112,12 +116,12 @@ var RollGroup = function(inputString){
 		}
 		if (char === ',' && braceOpen === 0) {
 			splitString = inputString.slice(lastCommaIndex, charIndex);
-			rollArray.push(new RollSum(splitString));
+			rollArray.push(new RollSum(splitString, this._options));
 			lastCommaIndex = charIndex + 1;
 		}
 	}
 	splitString = inputString.slice(lastCommaIndex, charIndex);
-	rollArray.push(new RollSum(splitString));
+	rollArray.push(new RollSum(splitString, this._options));
 
 	var optionsString = inputString.slice(charIndex + 1);
 

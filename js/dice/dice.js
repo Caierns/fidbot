@@ -4,6 +4,7 @@ var RollSum = require('./rollSum.js');
 
 var Dice = function(options){
 	this._MAXCOUNT = options.maxCount || 100;
+	this._options = options;
 	this.error = false; // Set a flag to indicate the input is invalid
 	this.errorMessage = '';
 };
@@ -292,7 +293,7 @@ Dice.prototype.evalAkun = function(inputString){
 };
 
 Dice.prototype.eval = function(inputString){
-	var rollSum = new RollSum(inputString);
+	var rollSum = new RollSum(inputString, this._options);
 	if (rollSum.error) {
 		this.error = rollSum.error;
 		this.errorMessage = rollSum.errorMessage;
