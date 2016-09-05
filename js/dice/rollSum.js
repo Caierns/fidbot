@@ -37,36 +37,32 @@ class RollSum {
 		this._members = rollArray;
 		this._sum = 0;
 		this._successes = 0;
-		this.error = false;
-		this.errorMessage = '';
+		this._error = false;
+		this._errorMessage = '';
 		this._isTypeSuccess = this._members[0].isTypeSuccess;
 
 		var memberIndex, member;
 		for (memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
 			member = this._members[memberIndex];
 			if (member.error) {
-				this.error = true;
-				this.errorMessage = member.errorMessage;
+				this._error = true;
+				this._errorMessage = member.errorMessage;
 				return;
 			}
 			if (member.isTypeSuccess !== this._isTypeSuccess) {
-				this.error = true;
-				this.errorMessage = 'Error: mixed sum and success roll types.';
+				this._error = true;
+				this._errorMessage = 'Error: mixed sum and success roll types.';
 				return;
 			}
 		}
 	}
 
-	executeDice(){
-		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
-			var member = this._members[memberIndex];
-			member.executeDice();
-			if (this._isTypeSuccess) {
-				this._successes += member.successes;
-			} else {
-				this._sum += member.sum;
-			}
-		}
+	get error(){
+		return this._error;
+	}
+
+	get errorMessage(){
+		return this._errorMessage;
 	}
 
 	get isTypeSuccess(){
@@ -79,6 +75,18 @@ class RollSum {
 
 	get successes(){
 		return this._successes;
+	}
+
+	executeDice(){
+		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
+			var member = this._members[memberIndex];
+			member.executeDice();
+			if (this._isTypeSuccess) {
+				this._successes += member.successes;
+			} else {
+				this._sum += member.sum;
+			}
+		}
 	}
 
 	toString(){
@@ -98,8 +106,8 @@ class RollGroup {
 	constructor(inputString, options){
 		this._options = options;
 
-		this.error = true;
-		this.errorMessage = 'Error: grouped rolls not yet supported.';
+		this._error = true;
+		this._errorMessage = 'Error: grouped rolls not yet supported.';
 		return;
 
 		var rollArray = [];
@@ -133,36 +141,32 @@ class RollGroup {
 
 		this._sum = 0;
 		this._successes = 0;
-		this.error = false;
-		this.errorMessage = '';
+		this._error = false;
+		this._errorMessage = '';
 		this._isTypeSuccess = this._members[0].isTypeSuccess;
 
 		var memberIndex, member;
 		for (memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
 			member = this._members[memberIndex];
 			if (member.error) {
-				this.error = true;
-				this.errorMessage = member.errorMessage;
+				this._error = true;
+				this._errorMessage = member.errorMessage;
 				return;
 			}
 			if (member.isTypeSuccess !== this._isTypeSuccess) {
-				this.error = true;
-				this.errorMessage = 'Error: mixed sum and success roll types.';
+				this._error = true;
+				this._errorMessage = 'Error: mixed sum and success roll types.';
 				return;
 			}
 		}
 	}
 
-	executeDice(){
-		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
-			var member = this._members[memberIndex];
-			member.executeDice();
-			if (this._isTypeSuccess) {
-				this._successes += member.successes;
-			} else {
-				this._sum += member.sum;
-			}
-		}
+	get error(){
+		return this._error;
+	}
+
+	get errorMessage(){
+		return this._errorMessage;
 	}
 
 	get isTypeSuccess(){
@@ -175,6 +179,18 @@ class RollGroup {
 
 	get successes(){
 		return this._successes;
+	}
+
+	executeDice(){
+		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
+			var member = this._members[memberIndex];
+			member.executeDice();
+			if (this._isTypeSuccess) {
+				this._successes += member.successes;
+			} else {
+				this._sum += member.sum;
+			}
+		}
 	}
 
 	toString(){

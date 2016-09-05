@@ -6,8 +6,8 @@ class Dice {
 	constructor(options){
 		this._MAXCOUNT = options.maxCount || 100;
 		this._options = options;
-		this.error = false; // Set a flag to indicate the input is invalid
-		this.errorMessage = '';
+		this._error = false; // Set a flag to indicate the input is invalid
+		this._errorMessage = '';
 	}
 
 	evalAkun(inputString){
@@ -296,8 +296,8 @@ class Dice {
 	evalRoll20(inputString){
 		var rollSum = new RollSum(inputString, this._options);
 		if (rollSum.error) {
-			this.error = rollSum.error;
-			this.errorMessage = rollSum.errorMessage;
+			this._error = rollSum.error;
+			this._errorMessage = rollSum.errorMessage;
 			return;
 		}
 
@@ -310,6 +310,14 @@ class Dice {
 		}
 
 		return outputString;
+	}
+
+	get error(){
+		return this._error;
+	}
+
+	get errorMessage(){
+		return this._errorMessage;
 	}
 }
 

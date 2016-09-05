@@ -67,6 +67,21 @@ class Roll {
 		return this._successes;
 	}
 
+	_parseMods(modString){
+		if (modString !== '') {
+			var modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
+			var matchMod;
+			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '') {
+				matchMod[2] = matchMod[2] || '=';
+				matchMod[3] = parseInt(matchMod[3], 10);
+				this['_mod_' + matchMod[1]](matchMod);
+				if (this.error) {
+					return;
+				}
+			}
+		}
+	}
+
 	'_mod_'(matchMod){
 		this['_mod_s'](matchMod);
 	}
@@ -140,54 +155,68 @@ class Roll {
 	}
 
 	'_mod_!'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_!!'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_!p'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_k'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_kh'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_kl'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_d'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_dh'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_dl'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_r'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_ro'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_sa'(matchMod){
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	'_mod_sd'(matchMod){
-	}
-
-	_parseMods(modString){
-		if (modString !== '') {
-			var modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
-			var matchMod;
-			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '') {
-				matchMod[2] = matchMod[2] || '=';
-				matchMod[3] = parseInt(matchMod[3], 10);
-				this['_mod_' + matchMod[1]](matchMod);
-			}
-		}
+		this._error = true;
+		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
 	_sumResults(){
@@ -219,16 +248,16 @@ class Roll {
 	_initialiseSuccessRange(){
 		if (!this._isTypeSuccess) {
 			this._isTypeSuccess = true;
-			this._s = this._s || new NumberRange();
-			this._f = this._f || new NumberRange();
+			this._s = new NumberRange();
+			this._f = new NumberRange();
 		}
 	}
 
-	static _formatCritSuccess(value){
+	static _formatCriticalSuccess(value){
 		return '**' + value + '**';
 	}
 
-	static _formatCritFail(value){
+	static _formatCriticalFail(value){
 		return '__' + value + '__';
 	}
 
@@ -238,10 +267,10 @@ class Roll {
 
 	_formatResult(result){
 		if (this._cs.isInRange(result)) {
-			result = Roll._formatCritSuccess(result);
+			result = Roll._formatCriticalSuccess(result);
 		}
 		if (this._cf.isInRange(result)) {
-			result = Roll._formatCritFail(result);
+			result = Roll._formatCriticalFail(result);
 		}
 		return result;
 	}
