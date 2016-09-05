@@ -157,7 +157,7 @@ fidbot.on('message', function(message){
 		if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
 			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 		}
-		if (/a+w+o+/i.test(messageContent)) {
+		if (/[^A-z]a+w+o{2,}/i.test(messageContent)) {
 			message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg');
 		}
 	}
