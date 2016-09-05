@@ -19,12 +19,12 @@ fidbot.on('message', function(message){
 	var guild = message.guild;
 	var guildConfig = guildConfigs[guild.id] || guildConfigs[DEFAULTGUILDNAME];
 
-	console.log(message.guild.name + '|' + message.author.username + ': ' + messageContent);
+	console.log(message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + messageContent);
 	if (message.author.bot) {
 		return;
 	}
 
-	if (messageContent.charAt(0) === '/' || messageContent.charAt(0) === '!') {
+	if (messageContent.charAt(0) === '/') {
 		var commandEndCharIndex = messageContent.indexOf(' ');
 		var command = commandEndCharIndex !== -1 ? messageContent.slice(1, commandEndCharIndex) : messageContent.slice(1);
 		var parameters = messageContent.slice(command.length + 2);
@@ -158,7 +158,9 @@ fidbot.on('message', function(message){
 			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 		}
 		if (/([^A-z]|^)a+w+o{2,}/i.test(messageContent)) {
-			message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg');
+			message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(function(message){
+				message.delete(2000);
+			});
 		}
 	}
 });
