@@ -33,10 +33,17 @@ class Roll {
 		this._isTypeSuccess = false;
 		this._cs = new NumberRange();
 		this._cf = new NumberRange();
-		this._cs.setGreaterThan(this._diceSize);
-		this._cf.setLessThan(1);
+		this._csSet = false;
+		this._cfSet = false;
 
 		this._parseMods(matchParams[3]);
+
+		if (!this._csSet) {
+			this._cs.setGreaterThan(this._diceSize);
+		}
+		if (!this._cfSet) {
+			this._cf.setLessThan(1);
+		}
 
 		this._results = [];
 		this._sum = 0;
@@ -122,7 +129,7 @@ class Roll {
 
 	'_mod_cs'(matchMod){
 		if (!isNaN(matchMod[3])) {
-			this._initialiseSuccessRange();
+			this._csSet = true;
 			switch (matchMod[2]) {
 				case '>':
 					this._cs.addGreaterThan(matchMod[3]);
@@ -139,7 +146,7 @@ class Roll {
 
 	'_mod_cf'(matchMod){
 		if (!isNaN(matchMod[3])) {
-			this._initialiseSuccessRange();
+			this._cfSet = true;
 			switch (matchMod[2]) {
 				case '>':
 					this._cf.addGreaterThan(matchMod[3]);
@@ -266,13 +273,14 @@ class Roll {
 	}
 
 	_formatResult(result){
+		var output = result;
 		if (this._cs.isInRange(result)) {
-			result = Roll._formatCriticalSuccess(result);
+			output = Roll._formatCriticalSuccess(output);
 		}
 		if (this._cf.isInRange(result)) {
-			result = Roll._formatCriticalFail(result);
+			output = Roll._formatCriticalFail(output);
 		}
-		return result;
+		return output;
 	}
 
 	executeDice(){
