@@ -6,9 +6,9 @@ var Dice = require('./js/dice/dice.js');
 var akun = require('./js/akun.js');
 
 var fidbot = new Discord.Client();
-var serverConfigs = {};
-const DEFAULTSERVERNAME = 'defaultConfig';
-const defaultServerConfig = {
+var guildConfigs = {};
+const DEFAULTGUILDNAME = 'defaultConfig';
+const defaultGuildConfig = {
 	dice: {
 		maxCount: 100
 	}
@@ -16,11 +16,10 @@ const defaultServerConfig = {
 
 fidbot.on('message', function(message){
 	var messageContent = message.content;
-	var server = message.server;
-	var serverConfig = serverConfigs[server.id] || serverConfigs[DEFAULTSERVERNAME];
-	var fidbotId = getUser(server, 'Fidbot').id;
+	var guild = message.guild;
+	var guildConfig = guildConfigs[guild.id] || guildConfigs[DEFAULTGUILDNAME];
 
-	console.log(message.author.username + ': ' + messageContent);
+	console.log(message.guild.name + '|' + message.author.username + ': ' + messageContent);
 	if (message.author.bot) {
 		return;
 	}
@@ -31,11 +30,11 @@ fidbot.on('message', function(message){
 		var parameters = messageContent.slice(command.length + 2);
 		switch (command) {
 			case 'dice':
-				var dice = new Dice(serverConfig.dice);
-				fidbot.sendMessage(message.channel, dice.evalAkun(parameters));
+				var dice = new Dice(guildConfig.dice);
+				message.channel.sendMessage(dice.evalAkun(parameters));
 				break;
 			case 'roll':
-				var roll = new Dice(serverConfig.dice);
+				var roll = new Dice(guildConfig.dice);
 
 				// First split off any trailing comment. The dice command should be a single word, so first space is where to split
 				var inputCommand, trailingComment;
@@ -50,30 +49,30 @@ fidbot.on('message', function(message){
 
 				var rollOutput = roll.eval(inputCommand.trim());
 				if (roll.error) {
-					fidbot.sendMessage(message.channel, roll.errorMessage);
+					message.channel.sendMessage(roll.errorMessage);
 				} else {
-					fidbot.sendMessage(message.channel, rollOutput + trailingComment);
+					message.channel.sendMessage(rollOutput + trailingComment);
 				}
 
 				break;
 			case 'configureDice':
-				var roleDiceMaster = getRole(server, 'DiceMaster');
+				var roleDiceMasterId = guild.roles.find('name', 'DiceMaster').id;
 
-				if (roleDiceMaster && message.author.hasRole(roleDiceMaster)) {
-					confirmServerHasOwnConfig(server.id);
-					serverConfigs[server.id].dice = {
+				if (roleDiceMasterId && message.member.roles.exists('id', roleDiceMasterId)) {
+					confirmGuildHasOwnConfig(guild.id);
+					guildConfigs[guild.id].dice = {
 						maxCount: parseInt(parameters, 10)
 					};
-					saveServerConfigs();
-					fidbot.reply(message, 'Dice reconfigured!');
+					saveGuildConfigs();
+					message.reply('Dice reconfigured!');
 				} else {
-					fidbot.reply(message, "I'm afraid I can't let you do that.");
+					message.reply("I'm afraid I can't let you do that.");
 				}
 				break;
 			case 'akun':
 			case 'anonkun':
 				akun.eval(parameters, function(output){
-					fidbot.sendMessage(message.channel, output);
+					message.channel.sendMessage(output);
 				});
 				break;
 			case 'call':
@@ -86,7 +85,7 @@ fidbot.on('message', function(message){
 				}
 				if (callName && callSlur) {
 					callName = callName.charAt(0).toUpperCase() + callName.slice(1);
-					if (callName === 'Fidbot' || callName === '<@' + fidbotId + '>') {
+					if (/fidbot/i.test(callName) || callName === '<@' + this.user.id + '>') {
 						callSlur = 'wonderful creation';
 					}
 					var yellNoun = callSlur.toUpperCase();
@@ -109,27 +108,27 @@ fidbot.on('message', function(message){
 						determiner = 'an';
 					}
 
-					fidbot.sendMessage(message.channel, callName + ' is ' + determiner + ' ' + callSlur + '! ' + determiner.toUpperCase() + ' ' + yellNoun + trailingExclamationMarks);
+					message.channel.sendMessage(callName + ' is ' + determiner + ' ' + callSlur + '! ' + determiner.toUpperCase() + ' ' + yellNoun + trailingExclamationMarks);
 				} else {
-					fidbot.reply(message, "that was a malformed accusation!");
+					message.reply("that was a malformed accusation!");
 				}
 				break;
 			case 'help':
 				switch (parameters) {
 					case 'akun':
-						fidbot.sendMessage(message.channel, 'Use `/akun live` to view a list of quests that are currently live.\nUse `/akun livelink` to view a list of links to the quests that are currently live.');
+						message.channel.sendMessage('Use `/akun live` to view a list of quests that are currently live.\nUse `/akun livelink` to view a list of links to the quests that are currently live.');
 						break;
 					case 'call':
-						fidbot.sendMessage(message.channel, 'Use `/call <X> a <Y>` to make Fidbot accuse X of being a Y.');
+						message.channel.sendMessage('Use `/call <X> a <Y>` to make Fidbot accuse X of being a Y.');
 						break;
 					case 'dice':
-						fidbot.sendMessage(message.channel, 'Roll dice like you\'re on Akun. Dice are going to undergo a rewrite to expand functionality though, syntax might change after that.');
+						message.channel.sendMessage('Roll dice like you\'re on Akun. Dice are going to undergo a rewrite to expand functionality though, syntax might change after that.');
 						break;
 					case 'wide':
-						fidbot.sendMessage(message.channel, 'Use `/wide <text>` to make Fidbot say <ｔｅｘｔ>.');
+						message.channel.sendMessage('Use `/wide <text>` to make Fidbot say <ｔｅｘｔ>.');
 						break;
 					default:
-						fidbot.sendMessage(message.channel, 'Fidbot currently offers a limited selection of functionality. Type `/help <command>` to find out more about them.\nFollowing commands currently supported: `akun`, `dice`, `call`, `wide`');
+						message.channel.sendMessage('Fidbot currently offers a limited selection of functionality. Type `/help <command>` to find out more about them.\nFollowing commands currently supported: `akun`, `dice`, `call`, `wide`');
 				}
 				break;
 			case 'kys':
@@ -143,27 +142,27 @@ fidbot.on('message', function(message){
 						'I bet your mother is real proud of you right now.',
 						'make like a frog and reeeeeeeeeee'
 					];
-					fidbot.reply(message, killselfArray[Math.floor(Math.random() * killselfArray.length)]);
+					message.reply(killselfArray[Math.floor(Math.random() * killselfArray.length)]);
 				} else {
-					fidbot.reply(message, 'what did ' + parameters + ' ever do to you?!');
+					message.reply('what did ' + parameters + ' ever do to you?!');
 				}
 				break;
 			case 'wide':
-				fidbot.sendMessage(message.channel, makeWide(parameters));
+				message.channel.sendMessage(makeWide(parameters));
 				break;
 			default:
-			// fidbot.reply(message, "I didn't quite catch that I'm afraid.");
+			// message.reply( "I didn't quite catch that I'm afraid.");
 		}
 	} else {
 		if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
-			fidbot.sendMessage(message.channel, 'A slut! A SLUUUUUUTTTTT!');
+			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 		}
 	}
 });
 
-var confirmServerHasOwnConfig = function(serverId){
-	if (serverConfigs[serverId] === undefined) {
-		serverConfigs[serverId] = cloneObject(serverConfigs[DEFAULTSERVERNAME]);
+var confirmGuildHasOwnConfig = function(guildId){
+	if (guildConfigs[guildId] === undefined) {
+		guildConfigs[guildId] = cloneObject(guildConfigs[DEFAULTGUILDNAME]);
 	}
 };
 
@@ -171,32 +170,24 @@ var cloneObject = function(object){
 	return JSON.parse(JSON.stringify(object));
 };
 
-var saveServerConfigs = function(){
+var saveGuildConfigs = function(){
 	try {
 		fs.accessSync('./data');
 	} catch (err) {
 		fs.mkdirSync('./data');
 	}
-	fs.writeFileSync('./data/serverConfigs.json', JSON.stringify(serverConfigs));
+	fs.writeFileSync('./data/guildConfigs.json', JSON.stringify(guildConfigs));
 };
 
-var loadServerConfigs = function(){
-	serverConfigs = {};
+var loadGuildConfigs = function(){
+	guildConfigs = {};
 	try {
-		var data = fs.readFileSync('./data/serverConfigs.json', 'utf8');
-		serverConfigs = JSON.parse(data);
+		var data = fs.readFileSync('./data/guildConfigs.json', 'utf8');
+		guildConfigs = JSON.parse(data);
 	} catch (err) {
 		// console.log(err);
 	}
-	serverConfigs[DEFAULTSERVERNAME] = defaultServerConfig;
-};
-
-var getRole = function(server, rolename){
-	return server.roles.get('name', rolename);
-};
-
-var getUser = function(server, username){
-	return server.members.get('username', username);
+	guildConfigs[DEFAULTGUILDNAME] = defaultGuildConfig;
 };
 
 var makeWide = function(inputString){
@@ -212,5 +203,5 @@ var makeWide = function(inputString){
 	})
 };
 
-loadServerConfigs();
-fidbot.loginWithToken('MjIxMzMzMzA1MjAxNjU1ODA5.CqtUOA.HaFWJm4Po5RgHHZ43IC6YMQd7qw');
+loadGuildConfigs();
+fidbot.login('MjIxMzMzMzA1MjAxNjU1ODA5.CqtUOA.HaFWJm4Po5RgHHZ43IC6YMQd7qw');
