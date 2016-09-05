@@ -157,6 +157,9 @@ fidbot.on('message', function(message){
 		if (/alerni/i.test(messageContent) && /slut/i.test(messageContent)) {
 			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 		}
+		if (/a+w+o+/i.test(messageContent)) {
+			message.channel.sendFile('http://i1.kym-cdn.com/photos/images/facebook/000/910/542/1e8.jpg');
+		}
 	}
 });
 
