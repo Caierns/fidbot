@@ -35,6 +35,12 @@ class Roll {
 		this._cf = new NumberRange();
 		this._csSet = false;
 		this._cfSet = false;
+		this._sortAscending = false;
+		this._sortDescending = false;
+		this._drop = false;
+		this._dropHighest = false;
+		this._dropCount = 0;
+		this._droppedTracker = [];
 
 		this._parseMods(matchParams[3]);
 
@@ -90,10 +96,6 @@ class Roll {
 	}
 
 	'_mod_'(matchMod){
-		this['_mod_s'](matchMod);
-	}
-
-	'_mod_s'(matchMod){
 		if (!isNaN(matchMod[3])) {
 			this._initialiseSuccessRange();
 			switch (matchMod[2]) {
@@ -177,33 +179,33 @@ class Roll {
 	}
 
 	'_mod_k'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this['_mod_kh'](matchMod);
 	}
 
 	'_mod_kh'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		matchMod[3] = this._diceCount - matchMod[3];
+		this['_mod_dl'](matchMod);
 	}
 
 	'_mod_kl'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		matchMod[3] = this._diceCount - matchMod[3];
+		this['_mod_dh'](matchMod);
 	}
 
 	'_mod_d'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this['_mod_dl'](matchMod);
 	}
 
 	'_mod_dh'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._drop = true;
+		this._dropHighest = true;
+		this._dropCount = Math.max(matchMod[3], this._dropCount);
 	}
 
 	'_mod_dl'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._drop = true;
+		this._dropHighest = false;
+		this._dropCount = Math.max(matchMod[3], this._dropCount);
 	}
 
 	'_mod_r'(matchMod){
@@ -216,20 +218,24 @@ class Roll {
 		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
 	}
 
+	'_mod_s'(matchMod){
+		this['_mod_sa'](matchMod);
+	}
+
 	'_mod_sa'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._sortAscending = true;
 	}
 
 	'_mod_sd'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._sortDescending = true;
 	}
 
 	_sumResults(){
 		var sum = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			sum += this._results[resultIndex];
+			if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
+				sum += this._results[resultIndex];
+			}
 		}
 		this._sum = sum;
 	}
@@ -237,12 +243,14 @@ class Roll {
 	_tallyResults(){
 		var successes = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			var result = this._results[resultIndex];
-			if (this._s.isInRange(result)) {
-				successes++;
-			}
-			if (this._f.isInRange(result)) {
-				successes--;
+			if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
+				var result = this._results[resultIndex];
+				if (this._s.isInRange(result)) {
+					successes++;
+				}
+				if (this._f.isInRange(result)) {
+					successes--;
+				}
 			}
 		}
 		this._successes = successes;
@@ -283,14 +291,95 @@ class Roll {
 		return output;
 	}
 
+	static _sortAscendingFunction(a, b){
+		if (a > b) {
+			return 1;
+		}
+		if (a < b) {
+			return -1;
+		}
+		return 0;
+	}
+
+	static _sortDescendingFunction(a, b){
+		if (a > b) {
+			return -1;
+		}
+		if (a < b) {
+			return 1;
+		}
+		return 0;
+	}
+
+	static _sortKeepLowestFunction(a, b){
+		if (a[0] > b[0]) {
+			return 1;
+		}
+		if (a[0] < b[0]) {
+			return -1;
+		}
+		return 0;
+	}
+
+	static _sortKeepHighestFunction(a, b){
+		if (a[0] > b[0]) {
+			return -1;
+		}
+		if (a[0] < b[0]) {
+			return 1;
+		}
+		return 0;
+	}
+
+	static _sortResumeOriginalOrderFunction(a, b){
+		if (a[1] > b[1]) {
+			return 1;
+		}
+		if (a[1] < b[1]) {
+			return -1;
+		}
+		return 0;
+	}
+
 	executeDice(){
-		for (var rollCount = this._diceCount; rollCount > 0; rollCount--) {
-			var result = this._getRandomDieResult();
+		var resultIndex, result;
+		for (resultIndex = 0; resultIndex < this._diceCount; resultIndex++) {
+			result = this._getRandomDieResult();
 			if (this._isFateDice) {
 				result -= 2;
 			}
 			this._results.push(result);
 		}
+
+		if (this._sortAscending) {
+			this._results.sort(Roll._sortAscendingFunction);
+		} else if (this._sortDescending) {
+			this._results.sort(Roll._sortDescendingFunction);
+		}
+
+		if (this._drop) {
+			// Generate an array we can sort willy nilly
+			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+				result = this._results[resultIndex];
+				this._droppedTracker.push([result, resultIndex, false]);
+			}
+			// Sort it
+			if (this._dropHighest) {
+				this._droppedTracker.sort(Roll._sortKeepHighestFunction);
+			} else {
+				this._droppedTracker.sort(Roll._sortKeepLowestFunction);
+			}
+			// Mark the first dropCount elements as dropped
+			for (resultIndex = 0; resultIndex < this._droppedTracker.length; resultIndex++) {
+				if (resultIndex >= this._dropCount) {
+					break;
+				}
+				this._droppedTracker[resultIndex][2] = true;
+			}
+			// Sort it by original index to restore it to the original order
+			this._droppedTracker.sort(Roll._sortResumeOriginalOrderFunction);
+		}
+
 		if (this._isTypeSuccess) {
 			this._tallyResults();
 		} else {
@@ -307,9 +396,20 @@ class Roll {
 			} else {
 				result = this._formatResult(result);
 			}
+			if (this._dropCount && this._droppedTracker[resultIndex][2]) {
+				result = Roll._formatDropped(result);
+			}
 			outputString += result;
 			if (resultIndex !== this._results.length - 1) {
-				outputString += this._isFateDice ? ' ' : '+';
+				if (this._isFateDice) {
+					outputString += ' ';
+				} else {
+					if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
+						outputString += '+';
+					} else {
+						outputString += Roll._formatDropped('+');
+					}
+				}
 			}
 		}
 		outputString += ')';
