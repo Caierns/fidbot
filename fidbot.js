@@ -47,7 +47,7 @@ fidbot.on('message', function(message){
 		switch (command) {
 			case 'dice':
 				var dice = new Dice(guildConfig.commands.dice);
-				message.channel.sendMessage(dice.evalAkun(parameters));
+				message.reply(dice.evalAkun(parameters));
 				break;
 			case 'roll':
 				var roll = new Dice(guildConfig.commands.dice);
@@ -65,9 +65,9 @@ fidbot.on('message', function(message){
 
 				var rollOutput = roll.evalRoll20(inputCommand.trim());
 				if (roll.error) {
-					message.channel.sendMessage(roll.errorMessage);
+					message.reply(roll.errorMessage);
 				} else {
-					message.channel.sendMessage(rollOutput + trailingComment);
+					message.reply(rollOutput + trailingComment);
 				}
 
 				break;
