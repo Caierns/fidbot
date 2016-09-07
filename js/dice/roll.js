@@ -50,6 +50,16 @@ class Roll {
 
 		this._parseMods(matchParams[3]);
 
+		if (this._explodingRange !== null) {
+			var probabilityExplosion = (this._explodingRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
+			var likelyTotalRollCount = this._diceCount / (1 - probabilityExplosion);
+			if (likelyTotalRollCount > this._options.maxCount) {
+				this._error = true;
+				this._errorMessage = 'Error: Due to exploding dice this input will statistically exceed the limit of ' + this._options.maxCount + ' dice rolls.';
+				return;
+			}
+		}
+
 		if (!this._csSet) {
 			this._cs.setGreaterThan(this._diceSize);
 		}
