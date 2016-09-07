@@ -31,10 +31,16 @@ class Roll {
 		this._diceSize = this._isFateDice ? 3 : parseInt(matchParams[2], 10);
 
 		this._isTypeSuccess = false;
+		this._s = null;
+		this._f = null;
 		this._cs = new NumberRange();
 		this._cf = new NumberRange();
 		this._csSet = false;
 		this._cfSet = false;
+		this._exploding = false;
+		this._explodingCompound = false;
+		this._explodingPenetrating = false;
+		this._explodingRange = null;
 		this._sortAscending = false;
 		this._sortDescending = false;
 		this._drop = false;
@@ -98,84 +104,75 @@ class Roll {
 	'_mod_'(matchMod){
 		if (!isNaN(matchMod[3])) {
 			this._initialiseSuccessRange();
-			switch (matchMod[2]) {
-				case '>':
-					this._s.addGreaterThan(matchMod[3]);
-					break;
-				case '<':
-					this._s.addLessThan(matchMod[3]);
-					break;
-				case '=':
-					this._s.addSpecificEquality(matchMod[3]);
-					break;
-			}
+			Roll._processComparator(matchMod[2], this._s, matchMod[3]);
 		}
 	}
 
 	'_mod_f'(matchMod){
 		if (!isNaN(matchMod[3])) {
 			this._initialiseSuccessRange();
-			switch (matchMod[2]) {
-				case '>':
-					this._f.addGreaterThan(matchMod[3]);
-					break;
-				case '<':
-					this._f.addLessThan(matchMod[3]);
-					break;
-				case '=':
-					this._f.addSpecificEquality(matchMod[3]);
-					break;
-			}
+			Roll._processComparator(matchMod[2], this._f, matchMod[3]);
 		}
 	}
 
 	'_mod_cs'(matchMod){
 		if (!isNaN(matchMod[3])) {
 			this._csSet = true;
-			switch (matchMod[2]) {
-				case '>':
-					this._cs.addGreaterThan(matchMod[3]);
-					break;
-				case '<':
-					this._cs.addLessThan(matchMod[3]);
-					break;
-				case '=':
-					this._cs.addSpecificEquality(matchMod[3]);
-					break;
-			}
+			Roll._processComparator(matchMod[2], this._cs, matchMod[3]);
 		}
 	}
 
 	'_mod_cf'(matchMod){
 		if (!isNaN(matchMod[3])) {
 			this._cfSet = true;
-			switch (matchMod[2]) {
-				case '>':
-					this._cf.addGreaterThan(matchMod[3]);
-					break;
-				case '<':
-					this._cf.addLessThan(matchMod[3]);
-					break;
-				case '=':
-					this._cf.addSpecificEquality(matchMod[3]);
-					break;
-			}
+			Roll._processComparator(matchMod[2], this._cf, matchMod[3]);
 		}
 	}
 
 	'_mod_!'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._exploding = true;
+		this._explodingCompound = false;
+		this._explodingPenetrating = false;
+		this._initialiseExplodingRange();
+		if (!isNaN(matchMod[3])) {
+			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
+		} else {
+			this._explodingRange.addGreaterThan(this._diceSize);
+		}
 	}
 
 	'_mod_!!'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		if (this._isFateDice) {
+			this._error = true;
+			this._errorMessage = 'Error: Compound exploding dice is incompatible with Fate dice.';
+			return;
+		}
+		this._exploding = false;
+		this._explodingCompound = true;
+		this._explodingPenetrating = false;
+		this._initialiseExplodingRange();
+		if (!isNaN(matchMod[3])) {
+			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
+		} else {
+			this._explodingRange.addGreaterThan(this._diceSize);
+		}
 	}
 
 	'_mod_!p'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		if (this._isFateDice) {
+			this._error = true;
+			this._errorMessage = 'Error: Penetrating exploding dice is incompatible with Fate dice.';
+			return;
+		}
+		this._exploding = false;
+		this._explodingCompound = false;
+		this._explodingPenetrating = true;
+		this._initialiseExplodingRange();
+		if (!isNaN(matchMod[3])) {
+			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
+		} else {
+			this._explodingRange.addGreaterThan(this._diceSize);
+		}
 	}
 
 	'_mod_k'(matchMod){
@@ -230,6 +227,20 @@ class Roll {
 		this._sortDescending = true;
 	}
 
+	static _processComparator(comparator, range, value){
+		switch (comparator) {
+			case '>':
+				range.addGreaterThan(value);
+				break;
+			case '<':
+				range.addLessThan(value);
+				break;
+			case '=':
+				range.addSpecificEquality(value);
+				break;
+		}
+	};
+
 	_sumResults(){
 		var sum = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
@@ -265,6 +276,12 @@ class Roll {
 			this._isTypeSuccess = true;
 			this._s = new NumberRange();
 			this._f = new NumberRange();
+		}
+	}
+
+	_initialiseExplodingRange(){
+		if (this._explodingRange === null) {
+			this._explodingRange = new NumberRange();
 		}
 	}
 
@@ -344,11 +361,36 @@ class Roll {
 	executeDice(){
 		var resultIndex, result;
 		for (resultIndex = 0; resultIndex < this._diceCount; resultIndex++) {
-			result = this._getRandomDieResult();
-			if (this._isFateDice) {
-				result -= 2;
+			if (this._exploding) {
+				do {
+					result = this._getRandomDieResult();
+					this._results.push(result);
+				} while (this._explodingRange.isInRange(result));
+			} else if (this._explodingCompound) {
+				result = 0;
+				do {
+					var newResult = this._getRandomDieResult();
+					result += newResult;
+				} while (this._explodingRange.isInRange(newResult));
+				this._results.push(result);
+			} else if (this._explodingPenetrating) {
+				result = this._getRandomDieResult();
+				this._results.push(result);
+				while (this._explodingRange.isInRange(result)) {
+					result = this._getRandomDieResult() - 1;
+					this._results.push(result);
+				}
+			} else {
+				result = this._getRandomDieResult();
+				this._results.push(result);
 			}
-			this._results.push(result);
+		}
+
+		if (this._isFateDice) {
+			// Need to change value of result so that sums add up properly
+			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+				this._results[resultIndex] -= 2;
+			}
 		}
 
 		if (this._sortAscending) {
