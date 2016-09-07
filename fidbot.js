@@ -176,7 +176,7 @@ fidbot.on('message', function(message){
 			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 		}
 		if (guildConfig.awoo.active) {
-			if (/([^A-z]|^)a+w+o{2,}/i.test(messageContent)) {
+			if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(messageContent)) {
 				message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(function(message){
 					message.delete(2000);
 				});
