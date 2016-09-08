@@ -1,6 +1,7 @@
 'use strict';
 
 const NumberRange = require('./numberRange.js');
+const DieResult = require('./DieResult.js');
 
 const _fateMapping = {
 	'-1': '-',
@@ -27,6 +28,7 @@ class Roll {
 			this._errorMessage = 'Error: max number of dice exceeded.';
 			return;
 		}
+		this._theoreticalDiceCount = 0;
 		this._isFateDice = matchParams[2] === 'F';
 		this._diceSize = this._isFateDice ? 3 : parseInt(matchParams[2], 10);
 
@@ -41,19 +43,33 @@ class Roll {
 		this._explodingCompound = false;
 		this._explodingPenetrating = false;
 		this._explodingRange = null;
+		this._explodingSet = false;
 		this._sortAscending = false;
 		this._sortDescending = false;
 		this._drop = false;
 		this._dropHighest = false;
 		this._dropCount = 0;
-		this._droppedTracker = [];
+		this._reroll = false;
+		this._rerollOnce = false;
+		this._rerollRange = null;
+		this._rerollSet = false;
 
 		this._parseMods(matchParams[3]);
 
+		if (this._rerollRange !== null) {
+			var probabilityReroll = (this._rerollRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
+			this._theoreticalDiceCount += this._rerollOnce ? this._diceCount * (1 + probabilityReroll) : this._diceCount / (1 - probabilityReroll);
+			if (this._theoreticalDiceCount > this._options.maxCount) {
+				this._error = true;
+				this._errorMessage = 'Error: Due to exploding dice this input will statistically exceed the limit of ' + this._options.maxCount + ' dice rolls.';
+				return;
+			}
+		}
+
 		if (this._explodingRange !== null) {
 			var probabilityExplosion = (this._explodingRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
-			var likelyTotalRollCount = this._diceCount / (1 - probabilityExplosion);
-			if (likelyTotalRollCount > this._options.maxCount) {
+			this._theoreticalDiceCount += this._diceCount / (1 - probabilityExplosion);
+			if (this._theoreticalDiceCount > this._options.maxCount) {
 				this._error = true;
 				this._errorMessage = 'Error: Due to exploding dice this input will statistically exceed the limit of ' + this._options.maxCount + ' dice rolls.';
 				return;
@@ -65,6 +81,12 @@ class Roll {
 		}
 		if (!this._cfSet) {
 			this._cf.setLessThan(1);
+		}
+		if (!this._explodingSet) {
+			this._explodingRange.setGreaterThan(this._diceSize);
+		}
+		if (!this._rerollSet) {
+			this._rerollRange.setLessThan(1);
 		}
 
 		this._results = [];
@@ -127,15 +149,15 @@ class Roll {
 
 	'_mod_cs'(matchMod){
 		if (!isNaN(matchMod[3])) {
-			this._csSet = true;
 			Roll._processComparator(matchMod[2], this._cs, matchMod[3]);
+			this._csSet = true;
 		}
 	}
 
 	'_mod_cf'(matchMod){
 		if (!isNaN(matchMod[3])) {
-			this._cfSet = true;
 			Roll._processComparator(matchMod[2], this._cf, matchMod[3]);
+			this._cfSet = true;
 		}
 	}
 
@@ -146,8 +168,7 @@ class Roll {
 		this._initialiseExplodingRange();
 		if (!isNaN(matchMod[3])) {
 			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
-		} else {
-			this._explodingRange.addGreaterThan(this._diceSize);
+			this._explodingSet = true;
 		}
 	}
 
@@ -163,8 +184,7 @@ class Roll {
 		this._initialiseExplodingRange();
 		if (!isNaN(matchMod[3])) {
 			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
-		} else {
-			this._explodingRange.addGreaterThan(this._diceSize);
+			this._explodingSet = true;
 		}
 	}
 
@@ -180,8 +200,7 @@ class Roll {
 		this._initialiseExplodingRange();
 		if (!isNaN(matchMod[3])) {
 			Roll._processComparator(matchMod[2], this._explodingRange, matchMod[3]);
-		} else {
-			this._explodingRange.addGreaterThan(this._diceSize);
+			this._explodingSet = true;
 		}
 	}
 
@@ -216,13 +235,22 @@ class Roll {
 	}
 
 	'_mod_r'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._reroll = true;
+		this._initialiseRerollRange();
+		if (!isNaN(matchMod[3])) {
+			Roll._processComparator(matchMod[2], this._rerollRange, matchMod[3]);
+			this._rerollSet = true;
+		}
 	}
 
 	'_mod_ro'(matchMod){
-		this._error = true;
-		this._errorMessage = 'Error: ' + matchMod[1] + ' mod has not yet been implemented!';
+		this._reroll = true;
+		this._rerollOnce = true;
+		this._initialiseRerollRange();
+		if (!isNaN(matchMod[3])) {
+			Roll._processComparator(matchMod[2], this._rerollRange, matchMod[3]);
+			this._rerollSet = true;
+		}
 	}
 
 	'_mod_s'(matchMod){
@@ -254,8 +282,9 @@ class Roll {
 	_sumResults(){
 		var sum = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
-				sum += this._results[resultIndex];
+			var result = this._results[resultIndex];
+			if (!result.dropped && !result.rerolled) {
+				sum += result.value;
 			}
 		}
 		this._sum = sum;
@@ -264,12 +293,12 @@ class Roll {
 	_tallyResults(){
 		var successes = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
-				var result = this._results[resultIndex];
-				if (this._s.isInRange(result)) {
+			var result = this._results[resultIndex];
+			if (!result.dropped && !result.rerolled) {
+				if (this._s.isInRange(result.value)) {
 					successes++;
 				}
-				if (this._f.isInRange(result)) {
+				if (this._f.isInRange(result.value)) {
 					successes--;
 				}
 			}
@@ -277,8 +306,12 @@ class Roll {
 		this._successes = successes;
 	}
 
-	_getRandomDieResult(){
+	_getRandomDieInteger(){
 		return 1 + Math.floor(Math.random() * this._diceSize);
+	}
+
+	_getRandomDieResult(index){
+		return new DieResult(this._getRandomDieInteger(), index);
 	}
 
 	_initialiseSuccessRange(){
@@ -292,6 +325,12 @@ class Roll {
 	_initialiseExplodingRange(){
 		if (this._explodingRange === null) {
 			this._explodingRange = new NumberRange();
+		}
+	}
+
+	_initialiseRerollRange(){
+		if (this._rerollRange === null) {
+			this._rerollRange = new NumberRange();
 		}
 	}
 
@@ -319,50 +358,30 @@ class Roll {
 	}
 
 	static _sortAscendingFunction(a, b){
-		if (a > b) {
+		if (a.value > b.value) {
 			return 1;
 		}
-		if (a < b) {
+		if (a.value < b.value) {
 			return -1;
 		}
 		return 0;
 	}
 
 	static _sortDescendingFunction(a, b){
-		if (a > b) {
+		if (a.value > b.value) {
 			return -1;
 		}
-		if (a < b) {
-			return 1;
-		}
-		return 0;
-	}
-
-	static _sortKeepLowestFunction(a, b){
-		if (a[0] > b[0]) {
-			return 1;
-		}
-		if (a[0] < b[0]) {
-			return -1;
-		}
-		return 0;
-	}
-
-	static _sortKeepHighestFunction(a, b){
-		if (a[0] > b[0]) {
-			return -1;
-		}
-		if (a[0] < b[0]) {
+		if (a.value < b.value) {
 			return 1;
 		}
 		return 0;
 	}
 
 	static _sortResumeOriginalOrderFunction(a, b){
-		if (a[1] > b[1]) {
+		if (a.index > b.index) {
 			return 1;
 		}
-		if (a[1] < b[1]) {
+		if (a.index < b.index) {
 			return -1;
 		}
 		return 0;
@@ -371,65 +390,76 @@ class Roll {
 	executeDice(){
 		var resultIndex, result;
 		for (resultIndex = 0; resultIndex < this._diceCount; resultIndex++) {
-			if (this._exploding) {
+			result = this._getRandomDieResult(this._results.length);
+			this._results.push(result);
+
+			if (this._reroll && this._rerollRange.isInRange(result.value)) {
 				do {
-					result = this._getRandomDieResult();
+					result.rerolled = true;
+					result = this._getRandomDieResult(this._results.length);
 					this._results.push(result);
-				} while (this._explodingRange.isInRange(result));
-			} else if (this._explodingCompound) {
-				result = 0;
-				do {
-					var newResult = this._getRandomDieResult();
-					result += newResult;
-				} while (this._explodingRange.isInRange(newResult));
-				this._results.push(result);
-			} else if (this._explodingPenetrating) {
-				result = this._getRandomDieResult();
-				this._results.push(result);
-				while (this._explodingRange.isInRange(result)) {
-					result = this._getRandomDieResult() - 1;
+				} while (!this._rerollOnce && this._rerollRange.isInRange(result.value));
+			}
+
+			if (this._exploding) {
+				while (this._explodingRange.isInRange(result.value)) {
+					result = this._getRandomDieResult(this._results.length);
+					result.exploded = true;
 					this._results.push(result);
 				}
-			} else {
-				result = this._getRandomDieResult();
-				this._results.push(result);
+			} else if (this._explodingCompound) {
+				if (this._explodingRange.isInRange(result.value)) {
+					result.exploded = true;
+					do {
+						var extraResultValue = this._getRandomDieInteger();
+						result.addValue(extraResultValue);
+					} while (this._explodingRange.isInRange(extraResultValue));
+				}
+			} else if (this._explodingPenetrating) {
+				while (this._explodingRange.isInRange(result.value)) {
+					result = this._getRandomDieResult(this._results.length);
+					result.exploded = true;
+					result.addValue(-1);
+					this._results.push(result);
+				}
 			}
 		}
 
 		if (this._isFateDice) {
 			// Need to change value of result so that sums add up properly
 			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-				this._results[resultIndex] -= 2;
+				this._results[resultIndex].addValue(-2);
 			}
+		}
+
+		if (this._drop) {
+			// Sort it
+			if (this._dropHighest) {
+				this._results.sort(Roll._sortDescendingFunction);
+			} else {
+				this._results.sort(Roll._sortAscendingFunction);
+			}
+			// Mark the first dropCount results as dropped
+			var dropsRemaining = this._dropCount;
+			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+				if (dropsRemaining <= 0) {
+					break;
+				}
+				result = this._results[resultIndex];
+				if (result.rerolled) {
+					continue;
+				}
+				result.dropped = true;
+				dropsRemaining--;
+			}
+			// Sort it by index to restore it to the original order
+			this._results.sort(Roll._sortResumeOriginalOrderFunction);
 		}
 
 		if (this._sortAscending) {
 			this._results.sort(Roll._sortAscendingFunction);
 		} else if (this._sortDescending) {
 			this._results.sort(Roll._sortDescendingFunction);
-		}
-
-		if (this._drop) {
-			// Generate an array we can sort willy nilly
-			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-				result = this._results[resultIndex];
-				this._droppedTracker.push([result, resultIndex, false]);
-			}
-			// Sort it
-			if (this._dropHighest) {
-				this._droppedTracker.sort(Roll._sortKeepHighestFunction);
-			} else {
-				this._droppedTracker.sort(Roll._sortKeepLowestFunction);
-			}
-			// Mark the first dropCount elements as dropped
-			for (resultIndex = 0; resultIndex < this._droppedTracker.length; resultIndex++) {
-				if (resultIndex >= this._dropCount) {
-					break;
-				}
-				this._droppedTracker[resultIndex][2] = true;
-			}
-			// Sort it by original index to restore it to the original order
-			this._droppedTracker.sort(Roll._sortResumeOriginalOrderFunction);
 		}
 
 		if (this._isTypeSuccess) {
@@ -443,26 +473,19 @@ class Roll {
 		var outputString = '(';
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
 			var result = this._results[resultIndex];
+			var value = result.value;
+			if (resultIndex < this._results.length - 1) {
+				value += this._isFateDice ? ' ' : '+';
+			}
 			if (this._isFateDice) {
-				result = _fateMapping[result];
+				value = _fateMapping[value];
 			} else {
-				result = this._formatResult(result);
+				value = this._formatResult(value);
 			}
-			if (this._dropCount && this._droppedTracker[resultIndex][2]) {
-				result = Roll._formatDropped(result);
+			if (result.dropped || result.rerolled) {
+				value = Roll._formatDropped(value);
 			}
-			outputString += result;
-			if (resultIndex !== this._results.length - 1) {
-				if (this._isFateDice) {
-					outputString += ' ';
-				} else {
-					if (!this._dropCount || !this._droppedTracker[resultIndex][2]) {
-						outputString += '+';
-					} else {
-						outputString += Roll._formatDropped('+');
-					}
-				}
-			}
+			outputString += value;
 		}
 		outputString += ')';
 		return outputString;
