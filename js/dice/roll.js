@@ -1,7 +1,7 @@
 'use strict';
 
 const NumberRange = require('./numberRange.js');
-const DieResult = require('./DieResult.js');
+const DieResult = require('./dieResult.js');
 
 const _fateMapping = {
 	'-1': '-',
