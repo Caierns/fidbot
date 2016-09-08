@@ -32,13 +32,20 @@ const defaultGuildConfig = {
 };
 
 fidbot.on('message', function(message){
+	if (message.author.bot) {
+		return;
+	}
+
+	if (!message.guild) {
+		message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
+		console.log('[[Guild missing]]' + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
+		return;
+	}
+
 	var messageContent = message.content;
 	var guildConfig = guildConfigs[message.guild.id] || guildConfigs[DEFAULTGUILDNAME];
 
 	console.log(message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + messageContent);
-	if (message.author.bot) {
-		return;
-	}
 
 	if (messageContent.charAt(0) === '/') {
 		var commandEndCharIndex = messageContent.indexOf(' ');
