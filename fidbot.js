@@ -5,6 +5,7 @@ var Discord = require('discord.js');
 var Dice = require('./js/dice/dice.js');
 var akun = require('./js/akun.js');
 
+var TOKEN = fs.readFileSync('./token', 'utf8');
 var fidbot = new Discord.Client();
 var guildConfigs = {};
 const DEFAULTGUILDNAME = 'defaultConfig';
@@ -339,4 +340,4 @@ var makeWide = function(inputString){
 };
 
 loadGuildConfigs();
-fidbot.login('MjIxMzMzMzA1MjAxNjU1ODA5.CqtUOA.HaFWJm4Po5RgHHZ43IC6YMQd7qw');
+fidbot.login(TOKEN);
