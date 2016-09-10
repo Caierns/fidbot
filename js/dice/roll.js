@@ -82,10 +82,10 @@ class Roll {
 		if (!this._cfSet) {
 			this._cf.setLessThan(1);
 		}
-		if (!this._explodingSet) {
+		if ((this._exploding || this._explodingCompound || this._explodingPenetrating) && !this._explodingSet) {
 			this._explodingRange.setGreaterThan(this._diceSize);
 		}
-		if (!this._rerollSet) {
+		if (this._reroll && !this._rerollSet) {
 			this._rerollRange.setLessThan(1);
 		}
 
