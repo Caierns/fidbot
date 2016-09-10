@@ -474,12 +474,13 @@ class Roll {
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
 			var result = this._results[resultIndex];
 			var value = result.value;
+			if (this._isFateDice) {
+				value = _fateMapping[value];
+			}
 			if (resultIndex < this._results.length - 1) {
 				value += this._isFateDice ? ' ' : '+';
 			}
-			if (this._isFateDice) {
-				value = _fateMapping[value];
-			} else {
+			if (!this._isFateDice) {
 				value = this._formatResult(value);
 			}
 			if (result.dropped || result.rerolled) {
