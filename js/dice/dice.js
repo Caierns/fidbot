@@ -1,6 +1,6 @@
 'use strict';
 
-var RollSum = require('./rollSum.js');
+var RollExpression = require('./rollExpression.js');
 
 class Dice {
 	constructor(options){
@@ -294,19 +294,17 @@ class Dice {
 	}
 
 	evalRoll20(inputString){
-		var rollSum = new RollSum(inputString, this._options);
-		if (rollSum.error) {
-			this._error = rollSum.error;
-			this._errorMessage = rollSum.errorMessage;
+		var rollExpression = new RollExpression(inputString, this._options);
+		if (rollExpression.error) {
+			this._error = rollExpression.error;
+			this._errorMessage = rollExpression.errorMessage;
 			return;
 		}
 
-		rollSum.executeDice();
-		var outputString = rollSum.toString();
-		if (rollSum.isTypeSuccess) {
-			outputString += ' = ' + rollSum.successes + ' Successes';
-		} else {
-			outputString += ' = ' + rollSum.sum;
+		rollExpression.executeDice();
+		var outputString = rollExpression.toString() + ' = ' + rollExpression.total;
+		if (rollExpression.isTypeSuccess) {
+			outputString += ' Successes';
 		}
 
 		return outputString;

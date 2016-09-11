@@ -90,8 +90,7 @@ class Roll {
 		}
 
 		this._results = [];
-		this._sum = 0;
-		this._successes = 0;
+		this._total = 0;
 	}
 
 	get error(){
@@ -110,12 +109,8 @@ class Roll {
 		return this._isTypeSuccess;
 	}
 
-	get sum(){
-		return this._sum;
-	}
-
-	get successes(){
-		return this._successes;
+	get total(){
+		return this._total;
 	}
 
 	_parseMods(modString){
@@ -279,7 +274,7 @@ class Roll {
 		}
 	};
 
-	_sumResults(){
+	_totalResultsSum(){
 		var sum = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
 			var result = this._results[resultIndex];
@@ -287,10 +282,10 @@ class Roll {
 				sum += result.value;
 			}
 		}
-		this._sum = sum;
+		this._total = sum;
 	}
 
-	_tallyResults(){
+	_totalResultsSuccesses(){
 		var successes = 0;
 		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
 			var result = this._results[resultIndex];
@@ -303,7 +298,7 @@ class Roll {
 				}
 			}
 		}
-		this._successes = successes;
+		this._total = successes;
 	}
 
 	_getRandomDieInteger(){
@@ -463,9 +458,9 @@ class Roll {
 		}
 
 		if (this._isTypeSuccess) {
-			this._tallyResults();
+			this._totalResultsSuccesses();
 		} else {
-			this._sumResults();
+			this._totalResultsSum();
 		}
 	}
 
