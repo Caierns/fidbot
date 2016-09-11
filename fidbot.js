@@ -340,4 +340,4 @@ var makeWide = function(inputString){
 };
 
 loadGuildConfigs();
-fidbot.login(TOKEN);
+fidbot.login(TOKEN).catch(console.log);
