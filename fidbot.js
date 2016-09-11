@@ -5,7 +5,7 @@ var Discord = require('discord.js');
 var Dice = require('./js/dice/dice.js');
 var akun = require('./js/akun.js');
 
-var TOKEN = fs.readFileSync('./token', 'utf8');
+var TOKEN = fs.readFileSync('./token', 'utf8').trim(); // Trim because linux
 var fidbot = new Discord.Client();
 var guildConfigs = {};
 const DEFAULTGUILDNAME = 'defaultConfig';
