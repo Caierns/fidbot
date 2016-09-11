@@ -106,7 +106,7 @@ class RollExpression {
 				values.push(member);
 			}
 		}
-		let total;
+		let total = values[0];
 		for (let operationIndex = 0; operationIndex < ORDER_OF_OPERATIONS.length; operationIndex++) {
 			let operation = ORDER_OF_OPERATIONS[operationIndex];
 			for (let valueIndex = 0; valueIndex < values.length; valueIndex++) {
