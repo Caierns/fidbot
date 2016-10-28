@@ -56,6 +56,10 @@ class Roll {
 
 		this._parseMods(matchParams[3]);
 
+		if (this._reroll && !this._rerollSet) {
+			this._rerollRange.setUpperBound(1);
+		}
+
 		if (this._rerollRange !== null) {
 			var probabilityReroll = (this._rerollRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
 			this._theoreticalDiceCount += this._rerollOnce ? this._diceCount * (1 + probabilityReroll) : this._diceCount / (1 - probabilityReroll);
@@ -64,6 +68,10 @@ class Roll {
 				this._errorMessage = 'Error: Due to exploding dice this input will statistically exceed the limit of ' + this._options.maxCount + ' dice rolls.';
 				return;
 			}
+		}
+
+		if ((this._exploding || this._explodingCompound || this._explodingPenetrating) && !this._explodingSet) {
+			this._explodingRange.setLowerBound(this._diceSize);
 		}
 
 		if (this._explodingRange !== null) {
@@ -81,12 +89,6 @@ class Roll {
 		}
 		if (!this._cfSet) {
 			this._cf.setUpperBound(1);
-		}
-		if ((this._exploding || this._explodingCompound || this._explodingPenetrating) && !this._explodingSet) {
-			this._explodingRange.setLowerBound(this._diceSize);
-		}
-		if (this._reroll && !this._rerollSet) {
-			this._rerollRange.setUpperBound(1);
 		}
 
 		this._results = [];
