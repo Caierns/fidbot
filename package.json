@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/Fiddlekins/fidbot#readme",
   "dependencies": {
-    "discord.js": "^9.0.2"
+    "discord.js": "^9.3.0"
   }
 }

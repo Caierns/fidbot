@@ -34,19 +34,20 @@ const defaultGuildConfig = {
 
 fidbot.on('message', function(message){
 	if (message.author.bot) {
+		console.log(getNiceTimestamp() + '|' + (message.guild && message.guild.name) + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
 		return;
 	}
 
 	if (!message.guild) {
 		message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
-		console.log('[[Guild missing]]' + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
+		console.log(getNiceTimestamp() + '|' + '[[Guild missing]]' + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
 		return;
 	}
 
 	var messageContent = message.content;
 	var guildConfig = guildConfigs[message.guild.id] || guildConfigs[DEFAULTGUILDNAME];
 
-	console.log(message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + messageContent);
+	console.log(getNiceTimestamp() + '|' + message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + messageContent);
 
 	if (messageContent.charAt(0) === '/') {
 		var commandEndCharIndex = messageContent.indexOf(' ');
@@ -337,6 +338,19 @@ var makeWide = function(inputString){
 			return $0;
 		}
 	})
+};
+
+var getNiceTimestamp = function(){
+	var time = new Date();
+	return '' + time.getFullYear() + '/' + padToTwo(time.getMonth()) + '/' + padToTwo(time.getDate()) + ' ' + padToTwo(time.getHours()) + ':' + padToTwo(time.getMinutes()) + ':' + padToTwo(time.getSeconds());
+};
+
+var padToTwo = function(input){
+	input = input.toString();
+	while (input.length < 2) {
+		input = '0' + input;
+	}
+	return input;
 };
 
 loadGuildConfigs();
