@@ -77,16 +77,16 @@ class Roll {
 		}
 
 		if (!this._csSet) {
-			this._cs.setGreaterThan(this._diceSize);
+			this._cs.setLowerBound(this._diceSize);
 		}
 		if (!this._cfSet) {
-			this._cf.setLessThan(1);
+			this._cf.setUpperBound(1);
 		}
 		if ((this._exploding || this._explodingCompound || this._explodingPenetrating) && !this._explodingSet) {
-			this._explodingRange.setGreaterThan(this._diceSize);
+			this._explodingRange.setLowerBound(this._diceSize);
 		}
 		if (this._reroll && !this._rerollSet) {
-			this._rerollRange.setLessThan(1);
+			this._rerollRange.setUpperBound(1);
 		}
 
 		this._results = [];
@@ -263,10 +263,10 @@ class Roll {
 	static _processComparator(comparator, range, value){
 		switch (comparator) {
 			case '>':
-				range.addGreaterThan(value);
+				range.addLowerBound(value);
 				break;
 			case '<':
-				range.addLessThan(value);
+				range.addUpperBound(value);
 				break;
 			case '=':
 				range.addSpecificEquality(value);

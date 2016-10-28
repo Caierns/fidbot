@@ -2,8 +2,8 @@
 
 class NumberRange {
 	constructor(){
-		this._greaterThan = Infinity;
-		this._lessThan = -Infinity;
+		this._lowerBound = Infinity;
+		this._upperBound = -Infinity;
 		this._specificEquality = {};
 	}
 
@@ -15,48 +15,48 @@ class NumberRange {
 		this._specificEquality[value] = false;
 	}
 
-	addGreaterThan(value){
-		this._greaterThan = Math.min(value, this._greaterThan);
+	addLowerBound(value){
+		this._lowerBound = Math.min(value, this._lowerBound);
 	}
 
-	setGreaterThan(value){
-		this._greaterThan = value;
+	setLowerBound(value){
+		this._lowerBound = value;
 	}
 
-	addLessThan(value){
-		this._lessThan = Math.max(value, this._lessThan);
+	addUpperBound(value){
+		this._upperBound = Math.max(value, this._upperBound);
 	}
 
-	setLessThan(value){
-		this._lessThan = value;
+	setUpperBound(value){
+		this._upperBound = value;
 	}
 
 	isInRange(number){
-		if (number >= this._greaterThan) {
+		if (number >= this._lowerBound) {
 			return true;
 		}
-		if (number <= this._lessThan) {
+		if (number <= this._upperBound) {
 			return true;
 		}
 		return !!this._specificEquality[number];
 	}
 
 	countIntegersInRange(lowerBound, upperBound){
-		if (this._greaterThan < this._lessThan) {
+		if (this._lowerBound < this._upperBound) {
 			return upperBound - lowerBound + 1;
 		}
 		var count = 0;
-		if (Number.isFinite(this._lessThan)) {
-			count += this._lessThan - lowerBound + 1;
+		if (Number.isFinite(this._upperBound)) {
+			count += this._upperBound - lowerBound + 1;
 		}
-		if (Number.isFinite(this._greaterThan)) {
-			count += upperBound - this._greaterThan + 1;
+		if (Number.isFinite(this._lowerBound)) {
+			count += upperBound - this._lowerBound + 1;
 		}
 		for (var specificEquality in this._specificEquality) {
 			if (this._specificEquality.hasOwnProperty(specificEquality) &&
 				this._specificEquality[specificEquality] &&
-				specificEquality < this._greaterThan &&
-				specificEquality > this._lessThan &&
+				specificEquality < this._lowerBound &&
+				specificEquality > this._upperBound &&
 				specificEquality >= lowerBound &&
 				specificEquality <= upperBound) {
 				count++;
