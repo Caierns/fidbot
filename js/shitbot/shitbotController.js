@@ -74,7 +74,7 @@ class ShitbotController {
 	activate(){
 		this._active = true;
 		// Figure out the average user posting rate
-		let userCount = new Set([].concat(...this._windowSlidingPostingUsers.map(users => Array.from(users))));
+		let userCount = (new Set([].concat(...this._windowSlidingPostingUsers.map(users => Array.from(users))))).size;
 		let postCount = this._windowSliding.reduce((a, b)=>{
 			return a + b;
 		});
