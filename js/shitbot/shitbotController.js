@@ -44,7 +44,7 @@ class ShitbotController {
 				this._windowSliding = this._windowSliding.slice(this._windowSliding.length - WINDOW_SIZE);
 				this._windowSlidingPostingUsers = this._windowSlidingPostingUsers.slice(this._windowSlidingPostingUsers.length - WINDOW_SIZE);
 				this._windowSlidingMessageContent = this._windowSlidingMessageContent.slice(this._windowSlidingMessageContent.length - WINDOW_SIZE);
-				if (!this._windowFixed) {
+				if (!this._windowFixed.length) {
 					this._windowFixed = this._windowSliding.slice();
 				}
 			}
