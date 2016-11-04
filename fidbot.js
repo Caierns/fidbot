@@ -43,7 +43,7 @@ fidbot.on('message', function(message){
 		return;
 	}
 
-	if (message.guild.name === 'Quest General') {
+	if (message.channel && message.channel.id) {
 		let channelId = message.channel.id;
 		let shitBotController = shitbotControllers[channelId] = shitbotControllers[channelId] || new ShitbotController(message);
 		shitBotController.onNewMessage(message);
