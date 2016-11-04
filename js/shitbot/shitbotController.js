@@ -9,7 +9,7 @@ const STANDARD_DEVIATION = Math.sqrt(WINDOW_SIZE * (WINDOW_SIZE + 1) * ((2 * WIN
 console.log(TIME_INTERVAL, WINDOW_SIZE, STANDARD_DEVIATION);
 
 class ShitbotController {
-	constructor(message){
+	constructor(message, enabled){
 		this._channel = message.channel;
 		this._windowFixed = [];
 		this._windowSliding = [1];
@@ -19,12 +19,17 @@ class ShitbotController {
 		this._endOfIntervalTimestamp = message.createdTimestamp + TIME_INTERVAL;
 		this._shitbot = new Shitbot();
 		this._active = false;
+		this._enabled = enabled;
 		this._postTimeInterval = 0;
 		this._postWordCount = 0;
 	}
 
 	onNewMessage(message){
 		this._shitbot.addPost(message.content);
+
+		if (!this._enabled) {
+			return;
+		}
 
 		if (message.createdTimestamp < this._endOfIntervalTimestamp) {
 			this._windowSliding[this._windowSliding.length - 1]++;
@@ -95,6 +100,15 @@ class ShitbotController {
 		this._active = false;
 	}
 
+	enable(){
+		this._enabled = true;
+	}
+
+	disable(){
+		this._enabled = false;
+		this.deactivate();
+	}
+
 	static _statTest(sample1, sample2){
 		let stats = [];
 		for (let i = 0; i < sample1.length; i++) {
@@ -122,8 +136,8 @@ class ShitbotController {
 	}
 
 	_post(){
-		this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount));
 		if (this._active) {
+			this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount));
 			let timeOut = (1 + Math.sqrt(Math.random()) * 0.5 * (Math.floor(Math.random() + 0.5) ? 1 : -1)) * this._postTimeInterval;
 			setTimeout(this._post.bind(this), timeOut);
 		}

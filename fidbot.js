@@ -26,6 +26,9 @@ const defaultGuildConfig = {
 		},
 		kill: {
 			active: true
+		},
+		shitbot: {
+			active: false
 		}
 	},
 	awoo: {
@@ -43,12 +46,6 @@ fidbot.on('message', function(message){
 		return;
 	}
 
-	if (message.channel && message.channel.id) {
-		let channelId = message.channel.id;
-		let shitBotController = shitbotControllers[channelId] = shitbotControllers[channelId] || new ShitbotController(message);
-		shitBotController.onNewMessage(message);
-	}
-
 	if (!message.guild) {
 		message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
 		console.log(getNiceTimestamp() + '|' + '[[Guild missing]]' + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
@@ -57,6 +54,12 @@ fidbot.on('message', function(message){
 
 	var messageContent = message.content;
 	var guildConfig = guildConfigs[message.guild.id] || guildConfigs[DEFAULTGUILDNAME];
+
+	if (message.channel && message.channel.id) {
+		let channelId = message.channel.id;
+		let shitBotController = shitbotControllers[channelId] = shitbotControllers[channelId] || new ShitbotController(message, guildConfig.commands.shitbot.active);
+		shitBotController.onNewMessage(message);
+	}
 
 	console.log(getNiceTimestamp() + '|' + message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + messageContent);
 
@@ -289,6 +292,23 @@ var configure = function(inputString, message){
 				}
 				break;
 			case 'dice': // Next bit handles dice config
+				break;
+			case 'shitbot':
+				if (parameters === 'on') {
+					guildConfig.commands.shitbot.active = true;
+					if (message.channel && message.channel.id) {
+						shitbotControllers[message.channel.id].enable();
+					}
+					message.reply('Shitbot activated!');
+				} else if (parameters === 'off') {
+					guildConfig.commands.shitbot.active = false;
+					if (message.channel && message.channel.id) {
+						shitbotControllers[message.channel.id].disable();
+					}
+					message.reply('Shitbot deactivated!');
+				} else {
+					message.reply('Please use `/configure shitbot on` or `/configure shitbot off` to toggle the feature!');
+				}
 				break;
 			default:
 				message.reply('Option not recognised.');
