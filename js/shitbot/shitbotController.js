@@ -125,7 +125,7 @@ class ShitbotController {
 		this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount));
 		if (this._active) {
 			let timeOut = (1 + Math.sqrt(Math.random()) * 0.5 * (Math.floor(Math.random() + 0.5) ? 1 : -1)) * this._postTimeInterval;
-			setTimeout(this._post, timeOut);
+			setTimeout(this._post.bind(this), timeOut);
 		}
 	}
 }
