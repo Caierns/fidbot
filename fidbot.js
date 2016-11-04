@@ -4,6 +4,7 @@ var fs = require('fs');
 var Discord = require('discord.js');
 var Dice = require('./js/dice/dice.js');
 var akun = require('./js/akun.js');
+const ShitbotController = require('./js/shitbot/shitbotController');
 
 var TOKEN = fs.readFileSync('./token', 'utf8').trim(); // Trim because linux
 var fidbot = new Discord.Client();
@@ -32,90 +33,20 @@ const defaultGuildConfig = {
 	}
 };
 
-// Inspired by http://www.cse.psu.edu/~duk17/papers/change.pdf
-let shitbotData = {};
-const WINDOW_SIZE = 30; // Can't go higher than 99 without extra coding due to fetchMessages limitations
-const STANDARD_DEVIATION = Math.sqrt(WINDOW_SIZE * (WINDOW_SIZE + 1) * ((2 * WINDOW_SIZE) + 1) / 6);
-console.log(WINDOW_SIZE, STANDARD_DEVIATION);
-
-let statTest = function(sample1, sample2){
-	let stats = [];
-	for (let i = 0; i < sample1.length; i++) {
-		let dif = sample2[i] - sample1[i];
-		if (dif === 0) {
-			continue;
-		}
-		stats.push({
-			sgn: Math.sign(dif),
-			abs: Math.abs(dif)
-		});
-	}
-	stats.sort((a, b)=>{
-		return a.abs - b.abs;
-	});
-	for (let i = 0; i < stats.length; i++) {
-		stats[i].rank = i;
-		// TODO correct for multiple entries with the same abs value
-	}
-	let statistic = 0;
-	for (let i = 0; i < stats.length; i++) {
-		statistic += stats[i].sgn * stats[i].rank;
-	}
-	return statistic;
-};
+let shitbotControllers = {};
 
 fidbot.on('message', function(message){
 
-	if (message.guild.name === 'SpookyG' || message.guild.name === 'test') {
-		let channelId = message.channel.id;
-		let data = shitbotData[channelId] = shitbotData[channelId] || {};
-
-		if (data.latestTimestamp) {
-			// We've already initialised the data store
-			data.windowSliding.push(message.createdTimestamp - data.latestTimestamp);
-			if (data.windowSliding.length > WINDOW_SIZE) {
-				data.windowSliding.shift();
-			}
-			data.latestTimestamp = message.createdTimestamp;
-			let statResults = statTest(data.windowFixed, data.windowSliding);
-			console.log(message.channel.id, statResults);
-			if (Math.abs(statResults) > STANDARD_DEVIATION) {
-				// Change is upon us, go wild!
-				data.windowFixed = data.windowSliding.slice();
-				if (statResults < 0) {
-					// Post rate increased
-					console.log(message.channel.id, 'SHITBOT ACTIVATED!');
-					data.active = true;
-					message.channel.sendMessage('I AM NOW TURNED ON.');
-				} else {
-					data.active = false;
-					console.log(message.channel.id, 'Shitbot deactivated...');
-					message.channel.sendMessage('It\'s gone floppy again...');
-				}
-			}
-		} else {
-			// We need to initialise the data store
-			message.channel.fetchMessages({limit: WINDOW_SIZE + 1}).then(fetchedMessages =>{
-				let timestamps = fetchedMessages.map((fetchedMessage)=>{
-					return fetchedMessage.createdTimestamp;
-				});
-				let timeIntervals = [];
-				let previousTimestamp = timestamps[timestamps.length - 1];
-				for (var i = timestamps.length - 2; i >= 0; i--) {
-					timeIntervals.push(timestamps[i] - previousTimestamp);
-					previousTimestamp = timestamps[i];
-				}
-				data.latestTimestamp = timestamps[0];
-				data.windowFixed = timeIntervals;
-				data.windowSliding = timeIntervals.slice();
-			}).catch(console.error);
-		}
-	}
-
-	// Ignore normal activity
+	// Ignore bots
 	if (message.author.bot) {
 		console.log(getNiceTimestamp() + '|' + (message.guild && message.guild.name) + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
 		return;
+	}
+
+	if (message.guild.name === 'Quest General') {
+		let channelId = message.channel.id;
+		let shitBotController = shitbotControllers[channelId] = shitbotControllers[channelId] || new ShitbotController(message);
+		shitBotController.onNewMessage(message);
 	}
 
 	if (!message.guild) {
