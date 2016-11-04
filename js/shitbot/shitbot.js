@@ -10,6 +10,10 @@ class Shitbot {
 	}
 
 	addPost(post){
+		if (/!\//.test(post.charAt(0))) {
+			// Ignore bot commands
+			return;
+		}
 		post = post.replace(/[^\.\?\!]\n/g, '.\n');
 		let words = post.split(/\s/);
 		words.forEach(this._processNewWord, this);
@@ -34,7 +38,7 @@ class Shitbot {
 			} else if (this._frequencyAllCaps[word] > this._frequencyNoCaps[word]) {
 				word = word.toUpperCase();
 			}
-			post += word + (wordCount > 1 ? ' ' : '');
+			post += word + (wordCount > 0 ? ' ' : '');
 
 			// Handle sequential word and index switching
 			sequentialWordCount--;
@@ -52,6 +56,11 @@ class Shitbot {
 		// Capitalise sentence starts
 		post = post.charAt(0).toUpperCase() + post.slice(1);
 		post = post.replace(/([.?!]\s)([a-z])/g, Shitbot._capitaliseSentenceStartReplacementFunction);
+		// Put meme arrows on new lines
+		post = post.replace(/ >/g, '\n>');
+		// Remove speechmarks and other paired symbols
+		post = post.replace(/"\[]\{}/g, '');
+
 		return post;
 	}
 
