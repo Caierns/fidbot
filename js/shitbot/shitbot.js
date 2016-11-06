@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const SEED_PATH = path.join('seed');
+const SEED_PATH = path.join('js', 'shitbot', 'seed');
 
 class WordPermutations {
 	constructor(word){
@@ -48,6 +48,18 @@ class WordStore extends Map {
 		}
 		let index = Math.floor(WordStore._transformProbability(Math.random()) * target.length);
 		return target[index];
+	}
+
+	size(key){
+		if (key === undefined) {
+			return super.size();
+		}
+		let target = super.get(key);
+		if (target) {
+			return target.length;
+		} else {
+			return 0;
+		}
 	}
 
 	static _transformProbability(p){
@@ -118,27 +130,37 @@ class MarkovBase {
 			let wordBeforeThat = words[wordIndex - 2];
 			wordBeforeThat = wordBeforeThat && wordBeforeThat.toLowerCase();
 			let endSentenceChar = MarkovBase._endsSentence(wordPrevious) && wordPrevious.slice(-1);
-			words.push(this._getWord(wordPrevious, wordBeforeThat, endSentenceChar));
+
+			words.push(this._cap(this._getWord(wordPrevious, wordBeforeThat, endSentenceChar)));
+
+			// Ensure it doesn't end with trailing weird punctuation
+			if ((wordIndex + 1) >= wordCount && /[,:;]$/.test(words[words.length - 1])) {
+				wordCount++;
+			}
 		}
 
 		return words.join(' ');
 	}
 
 	_getWord(wordPrevious, wordBeforeThat, endSentenceChar){
-		let word;
-		if (!word && wordBeforeThat) {
-			word = this.threeWordSequences.get(MarkovBase._threeWordSequenceKey(wordPrevious, wordBeforeThat));
+		if (wordBeforeThat) {
+			return this.threeWordSequences.get(MarkovBase._threeWordSequenceKey(wordPrevious, wordBeforeThat));
 		}
-		if (!word && wordPrevious) {
-			word = this.twoWordSequences.get(wordPrevious);
+		if (wordPrevious) {
+			return this.twoWordSequences.get(wordPrevious);
 		}
-		if (!word && endSentenceChar) {
-			word = this.oneWordStarts.get(endSentenceChar);
+		if (endSentenceChar) {
+			return this.oneWordStarts.get(endSentenceChar);
 		}
-		if (!word) {
-			word = this.oneWordStarts.get('.');
+		return this.oneWordStarts.get('.');
+	}
+
+	_cap(word){
+		let perm = this.capitalisationFrequency.get(word);
+		if (perm) {
+			word = perm.cap();
 		}
-		return this.capitalisationFrequency.get(word).cap();
+		return word;
 	}
 }
 
@@ -167,49 +189,64 @@ class Shitbot extends MarkovBase {
 	generatePost(wordCount){
 		let post = this.generate(Math.floor(wordCount));
 
-		// Capitalise sentence starts
-		post = post.charAt(0).toUpperCase() + post.slice(1);
-		post = post.replace(/([.?!]\s)([a-z])/g, Shitbot._capitaliseSentenceStartReplacementFunction);
 		// Put meme arrows on new lines
 		post = post.replace(/ >/g, '\n>');
 		// Remove speechmarks and other paired symbols
-		post = post.replace(/"\[]\{}\(\)/g, '');
+		post = post.replace(/["\[\]\{\}\(\)]/g, '');
+		// Capitalise sentence starts
+		post = post.charAt(0).toUpperCase() + post.slice(1);
+		post = post.replace(/([.?!]\s)([a-z])/g, Shitbot._capitaliseSentenceStartReplacementFunction);
 
 		return post;
 	}
 
+	static _useLocal(sizeLocal, sizeBase){
+		if (sizeLocal === 0) {
+			return false;
+		}
+		if (sizeBase === 0) {
+			return true;
+		}
+		if (sizeLocal < sizeBase) {
+			// Skew the odds in local's favour
+			sizeLocal = Math.log(sizeLocal);
+			sizeBase = Math.log(sizeBase);
+		}
+		return (Math.random() * (sizeLocal + sizeBase)) < sizeLocal;
+	}
+
+	static _determineWord(key, storeLocal, storeBase){
+		let sizeLocal = storeLocal.size(key);
+		let sizeBase = storeBase.size(key);
+
+		if (sizeLocal > 0 || sizeBase > 0) {
+			if (Shitbot._useLocal(sizeLocal, sizeBase)) {
+				return storeLocal.get(key);
+			} else {
+				return storeBase.get(key);
+			}
+		}
+	}
+
 	_getWord(wordPrevious, wordBeforeThat, endSentenceChar){
 		let word;
-		// Try the local word store first
-		if (!word && wordBeforeThat) {
-			word = this.threeWordSequences.get(MarkovBase._threeWordSequenceKey(wordPrevious, wordBeforeThat));
+		if (wordBeforeThat) {
+			let key = MarkovBase._threeWordSequenceKey(wordPrevious, wordBeforeThat);
+			word = Shitbot._determineWord(key, this.threeWordSequences, Shitbot.base.threeWordSequences);
 		}
 		if (!word && wordPrevious) {
-			word = this.twoWordSequences.get(wordPrevious);
+			word = Shitbot._determineWord(wordPrevious, this.twoWordSequences, Shitbot.base.twoWordSequences);
 		}
-		// Failing that try the base word store
-		if (!word && wordBeforeThat) {
-			word = Shitbot.base.threeWordSequences.get(MarkovBase._threeWordSequenceKey(wordPrevious, wordBeforeThat));
-		}
-		if (!word && wordPrevious) {
-			word = Shitbot.base.twoWordSequences.get(wordPrevious);
-		}
-		// In that case we need to just start a new sentence
 		if (!word && endSentenceChar) {
-			word = this.oneWordStarts.get(endSentenceChar);
+			word = Shitbot._determineWord(endSentenceChar, this.oneWordStarts, Shitbot.base.oneWordStarts);
 		}
-		// And if we can't find something with the right punctuation try the base store
-		if (!word && endSentenceChar) {
-			word = Shitbot.base.oneWordStarts.get(endSentenceChar);
-		}
-		// And failing that we go local default
 		if (!word) {
-			word = this.oneWordStarts.get('.');
+			word = Shitbot._determineWord('.', this.oneWordStarts, Shitbot.base.oneWordStarts);
 		}
-		// And if we're REALLY scraping we go base store default
-		if (!word) {
-			word = Shitbot.base.oneWordStarts.get('.');
-		}
+		return word;
+	}
+
+	_cap(word){
 		// Try to capitalise it with local frequency
 		let perm = this.capitalisationFrequency.get(word);
 		if (!perm) {
