@@ -154,6 +154,9 @@ class ConfigManager {
 				}
 				config.save();
 				reply = `${friendly} deactivated.`;
+			} else if (commandName === 'shitbot' && parameters[0] === 'now') {
+				this._fidbot.getShitbotController(message).activate();
+				return;
 			} else {
 				reply = 'Please use `/configure ' + commandName + ' on` or `/configure ' + commandName + ' off` to toggle the feature!';
 			}
