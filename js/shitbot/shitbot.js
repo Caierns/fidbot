@@ -3,33 +3,26 @@
 class WordPermutations {
 	constructor(word){
 		this._word = word.toLowerCase();
-		this._allCapital = 0;
-		this._startCapital = 0;
-		this._noCapital = 0;
-		this._total = 0;
+		this._permutations = new Map();
 	}
 
 	add(word){
-		if (/[A-Z]/.test(word.charAt(0))) {
-			if (/[^a-z]/.test(word.slice(1))) {
-				this._allCapital++;
-			} else {
-				this._startCapital++;
-			}
+		let freq = this._permutations.get(word);
+		if (freq === undefined) {
+			this._permutations.set(word, 1);
 		} else {
-			this._noCapital++;
+			this._permutations.set(word, freq + 1);
 		}
-		this._total++;
 	}
 
 	cap(){
-		let p = Math.random() * this._total;
-		if (p < this._allCapital) {
-			return this._word.toUpperCase();
-		} else if (p < this._allCapital + this._startCapital) {
-			return this._word.charAt(0).toUpperCase() + this._word.slice(1);
-		} else {
-			return this._word;
+		let p = Math.random() * this._permutations.size;
+		let runningWeight = 0;
+		for (let mapping of this._permutations) {
+			runningWeight += mapping[1];
+			if (p < runningWeight) {
+				return mapping[0];
+			}
 		}
 	}
 }
