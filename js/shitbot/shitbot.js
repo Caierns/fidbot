@@ -1,5 +1,9 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const SEED_PATH = path.join('seed');
+
 class WordPermutations {
 	constructor(word){
 		this._word = word.toLowerCase();
@@ -53,15 +57,11 @@ class WordStore extends Map {
 }
 
 class MarkovBase {
-	constructor(inputText){
+	constructor(){
 		this.capitalisationFrequency = new Map();
 		this.threeWordSequences = new WordStore();
 		this.twoWordSequences = new WordStore();
 		this.oneWordStarts = new WordStore();
-
-		if (inputText.length) {
-			this.add(inputText);
-		}
 	}
 
 	add(text){
@@ -144,7 +144,7 @@ class MarkovBase {
 
 class Shitbot extends MarkovBase {
 	constructor(commandCharacter){
-		super('');
+		super();
 		this._commandCharacter = commandCharacter;
 	}
 
@@ -165,7 +165,7 @@ class Shitbot extends MarkovBase {
 	}
 
 	generatePost(wordCount){
-		let post = this.generate(wordCount);
+		let post = this.generate(Math.floor(wordCount));
 
 		// Capitalise sentence starts
 		post = post.charAt(0).toUpperCase() + post.slice(1);
@@ -227,6 +227,17 @@ class Shitbot extends MarkovBase {
 	}
 }
 
-Shitbot.base = new MarkovBase('Some very basic input text');
+Shitbot.base = new MarkovBase();
+
+// Seed the base with files found in the seed folder
+fs.readdir(SEED_PATH, (err, files)=>{
+	if (files) {
+		files.forEach(file=>{
+			fs.readFile(path.join(SEED_PATH, file), 'utf8', (err, data)=>{
+				Shitbot.base.add(data);
+			});
+		});
+	}
+});
 
 module.exports = Shitbot;
