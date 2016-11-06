@@ -57,7 +57,7 @@ class Configuration {
 				active: true
 			},
 			shitbot: {
-				active: false
+				active: []
 			}
 		};
 
@@ -101,7 +101,8 @@ const COMMAND_NAME_TO_FRIENDLY_MAP = {
 };
 
 class ConfigManager {
-	constructor(){
+	constructor(fidbot){
+		this._fidbot = fidbot;
 		this._configurations = {};
 	}
 
@@ -112,22 +113,74 @@ class ConfigManager {
 		return this._configurations[id];
 	}
 
-	static configure(config, commandName, parameters){
-		if (commandName === 'conf') {
-			return `Let's not get all meta now.`;
+	configure(message, commandName, parameters, config){
+		if (!message.member) {
+			message.reply('This has not been made to work here.');
+			return;
 		}
-		let friendly = COMMAND_NAME_TO_FRIENDLY_MAP[commandName] || (commandName + ' feature');
-		if (parameters[0] === 'on') {
-			config[commandName].active = true;
-			config.save();
-			return `${friendly} activated!`;
-		} else if (parameters[0] === 'off') {
-			config[commandName].active = false;
-			config.save();
-			return `${friendly} deactivated.`;
+		if (message.member.hasPermission('ADMINISTRATOR') ||
+			message.member.hasPermission('MANAGE_CHANNELS') ||
+			message.member.hasPermission('MANAGE_GUILD')) {
+
+			let reply;
+
+			if (commandName === 'conf') {
+				reply = `Let's not get all meta now.`;
+			}
+			let friendly = COMMAND_NAME_TO_FRIENDLY_MAP[commandName] || (commandName + ' feature');
+			if (parameters[0] === 'on') {
+				if (commandName === 'shitbot') {
+					this._fidbot.getShitbotController(message).enable();
+					if (parameters[1] === 'all') {
+						config.shitbot.active = message.guild.channels.keyArray();
+					} else {
+						config.shitbot.active = ConfigManager.addElementToArray(config.shitbot.active, message.channel.id);
+					}
+				} else {
+					config[commandName].active = true;
+				}
+				config.save();
+				reply = `${friendly} activated!`;
+			} else if (parameters[0] === 'off') {
+				if (commandName === 'shitbot') {
+					this._fidbot.getShitbotController(message).disable();
+					if (parameters[1] === 'all') {
+						config.shitbot.active = [];
+					} else {
+						config.shitbot.active = ConfigManager.removeElementFromArray(config.shitbot.active, message.channel.id);
+					}
+				} else {
+					config[commandName].active = false;
+				}
+				config.save();
+				reply = `${friendly} deactivated.`;
+			} else {
+				reply = 'Please use `/configure ' + commandName + ' on` or `/configure ' + commandName + ' off` to toggle the feature!';
+			}
+
+			message.reply(reply);
 		} else {
-			return 'Please use `/configure ' + commandName + ' on` or `/configure ' + commandName + ' off` to toggle the feature!';
+			message.reply('You do not have suitable permissions to do this!');
 		}
+	}
+
+	static arrayHasElement(array, element){
+		return array.indexOf(element) !== -1
+	}
+
+	static addElementToArray(array, element){
+		if (array.indexOf(element) === -1) {
+			array.push(element);
+		}
+		return array;
+	}
+
+	static removeElementFromArray(array, element){
+		let index = array.indexOf(element);
+		if (index !== -1) {
+			return array.slice(0, index).concat(array.slice(index + 1));
+		}
+		return array;
 	}
 }
 

@@ -1,6 +1,5 @@
 'use strict';
 
-const ConfigManager = require('./configure.js');
 const Akun = require('./akun/akun.js');
 const Call = require('./call.js');
 const wide = require('./wide.js').wide;
@@ -16,10 +15,11 @@ const ALIASES = {
 };
 
 class Commands {
-	constructor(discordClient, configManager){
-		this._bot = discordClient;
-		this._configManager = configManager;
-		this._call = new Call(this._bot);
+	constructor(fidbot){
+		this._fidbot = fidbot;
+		this._commands = fidbot.commands;
+		this._configManager = fidbot.configManager;
+		this._call = new Call(fidbot.client);
 
 		this._commands = {
 			'akun': {
@@ -41,19 +41,8 @@ class Commands {
 			'conf': {
 				helpText: 'Use `/conf <feature>` to configure that feature.',
 				feature: (message, parameters, config)=>{
-					if (!message.member) {
-						message.reply('This has not been made to work here.');
-						return;
-					}
-					if (message.member.hasPermission('ADMINISTRATOR') ||
-						message.member.hasPermission('MANAGE_CHANNELS') ||
-						message.member.hasPermission('MANAGE_GUILD')) {
-						let commandName = Commands._resolveCommandName(parameters[0]);
-						let reply = ConfigManager.configure(config, commandName, parameters.slice(1));
-						message.reply(reply);
-					} else {
-						message.reply('You do not have suitable permissions to do this!');
-					}
+					let commandName = Commands._resolveCommandName(parameters[0]);
+					this._configManager.configure(message, commandName, parameters.slice(1), config);
 				}
 			},
 			'help': {

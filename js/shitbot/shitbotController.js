@@ -9,23 +9,26 @@ const STANDARD_DEVIATION = Math.sqrt(WINDOW_SIZE * (WINDOW_SIZE + 1) * ((2 * WIN
 console.log(TIME_INTERVAL, WINDOW_SIZE, STANDARD_DEVIATION);
 
 class ShitbotController {
-	constructor(message, enabled){
+	constructor(fidbot, message, enabled){
+		this._fidbot = fidbot;
 		this._channel = message.channel;
+		this._shitbot = new Shitbot(fidbot.commandCharacter);
+		this._active = false;
+		this._enabled = enabled;
 		this._windowFixed = [];
 		this._windowSliding = [1];
 		this._windowSlidingPostingUsers = [new Set()];
 		this._windowSlidingPostingUsers[0].add(message.author.id);
 		this._windowSlidingMessageContent = [''];
 		this._endOfIntervalTimestamp = message.createdTimestamp + TIME_INTERVAL;
-		this._shitbot = new Shitbot();
-		this._active = false;
-		this._enabled = enabled;
 		this._postTimeInterval = 0;
 		this._postWordCount = 0;
 	}
 
 	onNewMessage(message){
 		this._shitbot.addPost(message.content);
+
+		message.channel.sendMessage(this._shitbot.generatePost(15));
 
 		if (!this._enabled) {
 			return;

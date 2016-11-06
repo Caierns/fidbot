@@ -1,8 +1,8 @@
 'use strict';
 
 class Call {
-	constructor(bot){
-		this._bot = bot;
+	constructor(botClient){
+		this._botClient = botClient;
 	}
 
 	call(message, parameters){
@@ -15,7 +15,7 @@ class Call {
 		}
 		if (callName && callSlur) {
 			callName = callName.charAt(0).toUpperCase() + callName.slice(1);
-			if (/fidbot/i.test(callName) || callName === '<@' + this._bot.user.id + '>') {
+			if (/fidbot/i.test(callName) || callName === '<@' + this._botClient.user.id + '>') {
 				callSlur = 'wonderful creation';
 			}
 			var yellNoun = callSlur.toUpperCase();

@@ -7,52 +7,85 @@ const ConfigManager = require('./js/configure.js');
 const ShitbotController = require('./js/shitbot/shitbotController');
 
 const TOKEN = fs.readFileSync('./token', 'utf8').trim(); // Trim because linux
-const fidbot = new Discord.Client();
-const configManager = new ConfigManager();
-const commands = new Commands(fidbot, configManager);
-const COMMAND_CHARACTER = '/';
-let shitbotControllers = {};
 
-fidbot.on('message', message=>{
 
-	// Ignore bots
-	if (message.author.bot) {
-		console.log(getNiceTimestamp(message.createdAt) + '|' + (message.guild && message.guild.name) + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
-		return;
+class Fidbot {
+	constructor(token){
+		this.client = new Discord.Client();
+		this.configManager = new ConfigManager(this);
+		this.commands = new Commands(this);
+		this.commandCharacter = '/';
+		this.shitbotControllers = {};
+
+		this.client.on('ready', ()=>{
+			this.client.on('message', this._onMessage.bind(this));
+			console.log('Ready!');
+		});
+
+		this.client.login(token).catch(console.log);
 	}
 
-	// Ignore direct messages to the bot
-	if (!message.guild) {
-		message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
-		console.log(getNiceTimestamp(message.createdAt) + '|' + '[[Guild missing]]' + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
-		return;
-	}
+	_onMessage(message){
 
-	let config = configManager.getConfig(message.guild.id);
+		Fidbot._log(message);
 
-	if (message.channel && message.channel.id) {
-		let channelId = message.channel.id;
-		let shitbotController = shitbotControllers[channelId] = shitbotControllers[channelId] || new ShitbotController(message, config.shitbot.active);
-		shitbotController.onNewMessage(message);
-	}
-
-	console.log(getNiceTimestamp(message.createdAt) + '|' + message.guild.name + '|' + message.channel.name + '|' + message.author.username + ': ' + message.content);
-
-	if (message.content.charAt(0) === COMMAND_CHARACTER) {
-		commands.handle(message, message.content.slice(1).split(' '));
-	} else {
-		if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
-			message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
+		// Ignore bots
+		if (message.author.bot) {
+			return;
 		}
-		if (config.awoo.active) {
-			if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
-				message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message=>{
-					message.delete(2000);
-				});
+
+		// Ignore direct messages to the bot
+		if (!message.guild) {
+			message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
+			return;
+		}
+
+		this.getShitbotController(message).onNewMessage(message);
+
+		let config = this._getConfig(message);
+
+		if (message.content.charAt(0) === this.commandCharacter) {
+			this.commands.handle(message, message.content.slice(1).split(' '));
+		} else {
+			if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
+				message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
+			}
+			if (config.awoo.active) {
+				if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
+					message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message=>{
+						message.delete(2000);
+					});
+				}
 			}
 		}
 	}
-});
+
+	getShitbotController(message){
+		if (!this.shitbotControllers[message.channel.id]) {
+			let config = this._getConfig(message);
+			let isActive = ConfigManager.arrayHasElement(config.shitbot.active, message.channel.id);
+			this.shitbotControllers[message.channel.id] = new ShitbotController(this, message, isActive);
+		}
+		return this.shitbotControllers[message.channel.id];
+	}
+
+	static _log(message){
+		let logArray = [];
+		logArray.push(getNiceTimestamp(message.createdAt));
+		if (message.guild) {
+			logArray.push(message.guild.name);
+		} else {
+			logArray.push('[[Guild missing]]');
+		}
+		logArray.push(message.channel.name);
+		logArray.push(message.author.username + ': ' + message.content);
+		console.log(logArray.join('|'));
+	}
+
+	_getConfig(message){
+		return this.configManager.getConfig(message.guild.id);
+	}
+}
 
 var getNiceTimestamp = function(date){
 	var time = date || new Date();
@@ -67,4 +100,4 @@ var padToTwo = function(input){
 	return input;
 };
 
-fidbot.login(TOKEN).catch(console.log);
+const fidbot = new Fidbot(TOKEN);
