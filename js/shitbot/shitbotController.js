@@ -32,30 +32,32 @@ class ShitbotController {
 			return;
 		}
 
-		if (message.createdTimestamp < this._endOfIntervalTimestamp) {
-			this._windowSliding[this._windowSliding.length - 1]++;
-		} else {
-			do {
-				this._endOfIntervalTimestamp += TIME_INTERVAL;
-				this._windowSliding.push(0);
-				this._windowSlidingPostingUsers.push(new Set());
-				this._windowSlidingMessageContent.push('');
-			} while (this._endOfIntervalTimestamp <= message.createdTimestamp);
+		// Create any necessary new entries
+		while (this._endOfIntervalTimestamp <= message.createdTimestamp) {
+			this._endOfIntervalTimestamp += TIME_INTERVAL;
+			this._windowSliding.push(0);
+			this._windowSlidingPostingUsers.push(new Set());
+			this._windowSlidingMessageContent.push('');
+		}
 
-			this._windowSliding[this._windowSliding.length - 1]++;
-			this._windowSlidingPostingUsers[this._windowSlidingPostingUsers.length - 1].add(message.author.id);
-			this._windowSlidingMessageContent[this._windowSlidingMessageContent.length - 1] += ' ' + message.content;
+		// Update latest entry with new post information
+		this._windowSliding[this._windowSliding.length - 1]++;
+		this._windowSlidingPostingUsers[this._windowSlidingPostingUsers.length - 1].add(message.author.id);
+		this._windowSlidingMessageContent[this._windowSlidingMessageContent.length - 1] += ' ' + message.content;
 
-			if (this._windowSliding.length > WINDOW_SIZE) {
-				this._windowSliding = this._windowSliding.slice(this._windowSliding.length - WINDOW_SIZE);
-				this._windowSlidingPostingUsers = this._windowSlidingPostingUsers.slice(this._windowSlidingPostingUsers.length - WINDOW_SIZE);
-				this._windowSlidingMessageContent = this._windowSlidingMessageContent.slice(this._windowSlidingMessageContent.length - WINDOW_SIZE);
-				if (!this._windowFixed.length) {
-					this._windowFixed = this._windowSliding.slice();
-				}
+		// Trim windows if they have grown too large
+		if (this._windowSliding.length > WINDOW_SIZE) {
+			this._windowSliding = this._windowSliding.slice(this._windowSliding.length - WINDOW_SIZE);
+			this._windowSlidingPostingUsers = this._windowSlidingPostingUsers.slice(this._windowSlidingPostingUsers.length - WINDOW_SIZE);
+			this._windowSlidingMessageContent = this._windowSlidingMessageContent.slice(this._windowSlidingMessageContent.length - WINDOW_SIZE);
+
+			// The first time the sliding windows have reached the length the fixed windows can be set
+			if (!this._windowFixed.length) {
+				this._windowFixed = this._windowSliding.slice();
 			}
 		}
 
+		// If there are fixed windows then start doing stats on it
 		if (this._windowFixed.length) {
 			var statResults = ShitbotController._statTest(this._windowFixed, this._windowSliding);
 			if (Math.abs(statResults) > STANDARD_DEVIATION) {
@@ -78,7 +80,7 @@ class ShitbotController {
 		let postCount = this._windowSliding.reduce((a, b)=>{
 			return a + b;
 		});
-		let perUserPostCount = userCount / postCount;
+		let perUserPostCount = postCount / userCount;
 		let totalTime = TIME_INTERVAL * WINDOW_SIZE;
 		this._postTimeInterval = totalTime / perUserPostCount;
 		// Figure out the average word count
@@ -87,7 +89,8 @@ class ShitbotController {
 		});
 		this._postWordCount = mergedPostContent.split(/\s/).filter(word =>{
 			return word.length;
-		}).length / userCount;
+		}).length;
+		this._postWordCount /= userCount;
 		this._post();
 	}
 
