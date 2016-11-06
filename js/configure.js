@@ -122,6 +122,11 @@ class ConfigManager {
 			message.member.hasPermission('MANAGE_CHANNELS') ||
 			message.member.hasPermission('MANAGE_GUILD')) {
 
+			if (commandName === undefined) {
+				message.reply('Please use `/configure <command name> on` or `/configure <command name> off` to toggle the feature!');
+				return;
+			}
+
 			let reply;
 
 			if (commandName === 'conf') {
