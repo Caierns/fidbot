@@ -135,7 +135,7 @@ class ShitbotController {
 
 	_post(){
 		if (this._active) {
-			this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount));
+			this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount)).catch(console.error);
 			let timeOut = (1 + Math.sqrt(Math.random()) * 0.5 * (Math.floor(Math.random() + 0.5) ? 1 : -1)) * this._postTimeInterval;
 			setTimeout(this._post.bind(this), timeOut);
 		}

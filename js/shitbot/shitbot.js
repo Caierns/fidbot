@@ -79,6 +79,11 @@ class MarkovBase {
 	add(text){
 		let words = text.split(/\s/).filter(this._addWordFilter);
 
+		// Exit if we have nothing to work with
+		if (!words || !words.length){
+			return;
+		}
+
 		// Specially handle first word
 		this.oneWordStarts.add('.', words[0].toLowerCase());
 
