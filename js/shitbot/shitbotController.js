@@ -8,6 +8,8 @@ const WINDOW_SIZE = 10;
 const STANDARD_DEVIATION = Math.sqrt(WINDOW_SIZE * (WINDOW_SIZE + 1) * ((2 * WINDOW_SIZE) + 1) / 6);
 console.log(TIME_INTERVAL, WINDOW_SIZE, STANDARD_DEVIATION);
 
+const DISCORD_MESSAGE_CHARACTER_LIMIT = 2000;
+
 class ShitbotController {
 	constructor(fidbot, message, enabled){
 		this._fidbot = fidbot;
@@ -135,7 +137,17 @@ class ShitbotController {
 
 	_post(){
 		if (this._active) {
-			this._channel.sendMessage(this._shitbot.generatePost(this._postWordCount)).catch(console.error);
+			let shitpost = this._shitbot.generatePost(this._postWordCount);
+			let shitChunks = [];
+			while (shitpost.length >= DISCORD_MESSAGE_CHARACTER_LIMIT) {
+				shitChunks.push(shitpost.slice(0, DISCORD_MESSAGE_CHARACTER_LIMIT - 1) + '-');
+				shitpost = '-' + shitpost.slice(DISCORD_MESSAGE_CHARACTER_LIMIT - 1);
+			}
+			shitChunks.push(shitpost);
+			shitChunks.forEach(chunk=>{
+				this._channel.sendMessage(chunk).catch(console.error);
+			});
+
 			let timeOut = (1 + Math.sqrt(Math.random()) * 0.5 * (Math.floor(Math.random() + 0.5) ? 1 : -1)) * this._postTimeInterval;
 			setTimeout(this._post.bind(this), timeOut);
 		}
