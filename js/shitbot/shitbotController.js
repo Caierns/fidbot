@@ -95,7 +95,7 @@ class ShitbotController {
 		});
 		this._postWordCount = mergedPostContent.split(/\s/).filter(word =>{
 			return word.length;
-		}).length;
+		}).length / userCount;
 		this._post();
 	}
 
