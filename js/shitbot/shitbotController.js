@@ -56,22 +56,16 @@ class ShitbotController {
 			}
 		}
 
-		console.log(message.channel.id, this._windowFixed);
-		console.log(message.channel.id, this._windowSliding);
-
 		if (this._windowFixed.length) {
 			var statResults = ShitbotController._statTest(this._windowFixed, this._windowSliding);
-			console.log(message.channel.id, statResults, STANDARD_DEVIATION);
 			if (Math.abs(statResults) > STANDARD_DEVIATION) {
 				// Change is upon us, go wild!
 				this._windowFixed = this._windowSliding.slice();
 				if (statResults > 0) {
 					// Post rate increased
 					this.activate();
-					console.log(message.channel.id, 'SHITBOT ACTIVATED!');
 				} else {
 					this.deactivate();
-					console.log(message.channel.id, 'Shitbot deactivated...');
 				}
 			}
 		}
