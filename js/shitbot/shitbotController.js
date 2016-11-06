@@ -28,8 +28,6 @@ class ShitbotController {
 	onNewMessage(message){
 		this._shitbot.addPost(message.content);
 
-		message.channel.sendMessage(this._shitbot.generatePost(15));
-
 		if (!this._enabled) {
 			return;
 		}
