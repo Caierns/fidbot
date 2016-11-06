@@ -4,3 +4,5 @@ data
 token
 token - fidbot
 token - testbot
+js/shitbot/seed/*
+!js/shitbot/seed/.keep
