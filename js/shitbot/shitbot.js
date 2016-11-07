@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const SEED_PATH = path.join('js', 'shitbot', 'seed');
+const SEED_PATH = path.join('js', 'shitbot', 'seedBase');
 
 class WordPermutations {
 	constructor(word){
@@ -271,7 +271,7 @@ class Shitbot extends MarkovBase {
 
 Shitbot.base = new MarkovBase();
 
-// Seed the base with files found in the seed folder
+// Seed the base with files found in the seedBase folder
 fs.readdir(SEED_PATH, (err, files)=>{
 	if (files) {
 		files.forEach(file=>{

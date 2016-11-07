@@ -1,14 +1,23 @@
 'use strict';
 // Inspired by http://www.cse.psu.edu/~duk17/papers/change.pdf
 
+const fs = require('fs');
+const path = require('path');
 const Shitbot = require('./shitbot.js');
 
+const SEED_PATH = path.join('js', 'shitbot', 'seedChannel');
 const TIME_INTERVAL = 60 * 1000;
 const WINDOW_SIZE = 10;
 const STANDARD_DEVIATION = Math.sqrt(WINDOW_SIZE * (WINDOW_SIZE + 1) * ((2 * WINDOW_SIZE) + 1) / 6);
 console.log(TIME_INTERVAL, WINDOW_SIZE, STANDARD_DEVIATION);
 
 const DISCORD_MESSAGE_CHARACTER_LIMIT = 2000;
+
+// Ensure the directory exists
+try {
+	fs.mkdirSync(SEED_PATH);
+} catch (err) {
+}
 
 class ShitbotController {
 	constructor(fidbot, message, enabled){
@@ -25,9 +34,24 @@ class ShitbotController {
 		this._endOfIntervalTimestamp = message.createdTimestamp + TIME_INTERVAL;
 		this._postTimeInterval = 0;
 		this._postWordCount = 0;
+
+		fs.readFile(path.join(SEED_PATH, this._channel.id), 'utf8', (err, data)=>{
+			// Resume the old data
+			if (!err) {
+				this._shitbot.addPost(data);
+			}
+			// Create a new stream to write more data to it
+			this._writeStream = fs.createWriteStream(path.join(SEED_PATH, this._channel.id), {flags: 'a'});
+			this._writeStream.on('error', console.error);
+			this._writeStream.write(message.content + '\n', 'utf8');
+		});
 	}
 
 	onNewMessage(message){
+		if (this._writeStream) {
+			this._writeStream.write(message.content + '\n', 'utf8');
+		}
+
 		this._shitbot.addPost(message.content);
 
 		if (!this._enabled) {
@@ -145,7 +169,9 @@ class ShitbotController {
 			}
 			shitChunks.push(shitpost);
 			shitChunks.forEach(chunk=>{
-				this._channel.sendMessage(chunk).catch(console.error);
+				if (chunk && chunk.length) {
+					this._channel.sendMessage(chunk).catch(console.error);
+				}
 			});
 
 			let timeOut = (1 + Math.sqrt(Math.random()) * 0.5 * (Math.floor(Math.random() + 0.5) ? 1 : -1)) * this._postTimeInterval;
