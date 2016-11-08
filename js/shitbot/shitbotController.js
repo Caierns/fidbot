@@ -35,16 +35,50 @@ class ShitbotController {
 		this._postTimeInterval = 0;
 		this._postWordCount = 0;
 
-		fs.readFile(path.join(SEED_PATH, this._channel.id), 'utf8', (err, data)=>{
+		this._saveFilePath = path.join(SEED_PATH, this._channel.id);
+		fs.readFile(this._saveFilePath, 'utf8', (err, data)=>{
 			// Resume the old data
 			if (!err) {
 				this._shitbot.addPost(data);
 			}
 			// Create a new stream to write more data to it
-			this._writeStream = fs.createWriteStream(path.join(SEED_PATH, this._channel.id), {flags: 'a'});
+			this._writeStream = fs.createWriteStream(this._saveFilePath, {flags: 'a'});
 			this._writeStream.on('error', console.error);
 			this._writeStream.write(message.content + '\n', 'utf8');
 		});
+	}
+
+	destroy(shouldDeleteData){
+		this._fidbot.shitbotControllers[this._channel.id] = null;
+		this._fidbot = null;
+		this._channel = null;
+		return new Promise((resolve, reject)=>{
+			this._writeStream.on('finish', (err)=>{
+				if (err) {
+					reject(err);
+				}
+				if (shouldDeleteData) {
+					fs.unlink(this._saveFilePath, (err)=>{
+						if (err) {
+							reject(err);
+						}
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			});
+			this._writeStream.end();
+		});
+	}
+
+	reset(){
+		this._shitbot = new Shitbot(this._fidbot.commandCharacter);
+		fs.writeFile(this._saveFilePath, '', (err)=>{
+			if (err) {
+				console.error(err);
+			}
+		})
 	}
 
 	onNewMessage(message){

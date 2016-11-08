@@ -148,7 +148,7 @@ class ConfigManager {
 				reply = `${friendly} activated!`;
 			} else if (parameters[0] === 'off') {
 				if (commandName === 'shitbot') {
-					this._fidbot.getShitbotController(message).disable();
+					this._fidbot.getShitbotController(message).disable(); // TODO make this work for 'all'
 					if (parameters[1] === 'all') {
 						config.shitbot.active = [];
 					} else {
@@ -162,6 +162,9 @@ class ConfigManager {
 			} else if (commandName === 'shitbot' && parameters[0] === 'now') {
 				this._fidbot.getShitbotController(message).activate();
 				return;
+			} else if (commandName === 'shitbot' && parameters[0] === 'reset') {
+				this._fidbot.getShitbotController(message).reset();
+				reply = 'Shitbot data has been reset!';
 			} else {
 				reply = 'Please use `/configure ' + commandName + ' on` or `/configure ' + commandName + ' off` to toggle the feature!';
 			}
