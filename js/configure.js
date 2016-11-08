@@ -37,6 +37,9 @@ class Configuration {
 			call: {
 				active: true
 			},
+			choice: {
+				active: true
+			},
 			conf: {
 				active: true
 			},

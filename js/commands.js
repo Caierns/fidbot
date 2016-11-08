@@ -2,6 +2,7 @@
 
 const Akun = require('./akun/akun.js');
 const Call = require('./call.js');
+const choice = require('./choice.js').choice;
 const wide = require('./wide.js').wide;
 const kys = require('./kys.js').kys;
 const Roll20 = require('./dice/dice.js');
@@ -37,6 +38,10 @@ class Commands {
 				feature: (message, parameters)=>{
 					this._call.call(message, parameters);
 				}
+			},
+			'choice': {
+				helpText: 'Use `/choice <option1>;<option2>;...` to make Fidbot tell you how to live your life.',
+				feature: choice
 			},
 			'conf': {
 				helpText: 'Use `/conf <feature>` to configure that feature.',
