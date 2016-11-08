@@ -39,7 +39,9 @@ class ShitbotController {
 		fs.readFile(this._saveFilePath, 'utf8', (err, data)=>{
 			// Resume the old data
 			if (!err) {
-				this._shitbot.addPost(data);
+				data.split('/n').forEach(line=>{
+					this._shitbot.addPost(line);
+				});
 			}
 			// Create a new stream to write more data to it
 			this._writeStream = fs.createWriteStream(this._saveFilePath, {flags: 'a'});
