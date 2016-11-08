@@ -31,35 +31,38 @@ class Configuration {
 		this._filepath = path.join(DATA_PATH, this._filename);
 
 		this._value = {
-			akun: {
+			'akun': {
 				active: true
 			},
-			call: {
+			'call': {
 				active: true
 			},
-			choice: {
+			'choice': {
 				active: true
 			},
-			conf: {
+			'conf': {
 				active: true
 			},
-			help: {
+			'help': {
 				active: true
 			},
-			kill: {
+			'kill': {
 				active: true
 			},
-			roll: {
+			'8ball': {
+				active: true
+			},
+			'roll': {
 				maxCount: 100,
 				active: true
 			},
-			wide: {
+			'wide': {
 				active: true
 			},
-			awoo: {
+			'awoo': {
 				active: true
 			},
-			shitbot: {
+			'shitbot': {
 				active: []
 			}
 		};

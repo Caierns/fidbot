@@ -2,10 +2,11 @@
 
 const Akun = require('./akun/akun.js');
 const Call = require('./call.js');
-const choice = require('./choice.js').choice;
-const wide = require('./wide.js').wide;
-const kys = require('./kys.js').kys;
+const magic8Ball = require('./magic8Ball.js');
 const Roll20 = require('./dice/dice.js');
+const choice = require('./choice.js').choice;
+const kys = require('./kys.js').kys;
+const wide = require('./wide.js').wide;
 
 const ALIASES = {
 	'anonkun': 'akun',
@@ -66,6 +67,12 @@ class Commands {
 				helpText: `I will not be complicit in such actions!`,
 				hidden: true,
 				feature: kys
+			},
+			'8ball': {
+				helpText: 'Use `/8ball <question>?` to seek great wisdom.',
+				feature: (message, parameters)=>{
+					magic8Ball.magic8Ball(message, parameters);
+				}
 			},
 			'roll': {
 				helpText: 'Basic syntax is `/roll XdY`. This is a semi-complete implementation of the roll20 spec, you can find details of how to use more complex rolls on <https://wiki.roll20.net/Dice_Reference>',
