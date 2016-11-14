@@ -36,7 +36,7 @@ class Commands {
 			},
 			'call': {
 				helpText: 'Use `/call <X> a <Y>` to make Fidbot accuse X of being a Y.',
-				feature: (message, parameters)=>{
+				feature: (message, parameters) =>{
 					this._call.call(message, parameters);
 				}
 			},
@@ -46,7 +46,7 @@ class Commands {
 			},
 			'conf': {
 				helpText: 'Use `/conf <feature>` to configure that feature.',
-				feature: (message, parameters, config)=>{
+				feature: (message, parameters, config) =>{
 					let commandName = Commands._resolveCommandName(parameters[0]);
 					this._configManager.configure(message, commandName, parameters.slice(1), config);
 				}
@@ -54,7 +54,7 @@ class Commands {
 			'help': {
 				helpText: `Think you're real smart don't you.`,
 				hidden: true,
-				feature: (message, parameters)=>{
+				feature: (message, parameters) =>{
 					let commandName = Commands._resolveCommandName(parameters[0]);
 					if (this._commands[commandName]) {
 						message.reply(this._commands[commandName].helpText);
@@ -70,18 +70,18 @@ class Commands {
 			},
 			'8ball': {
 				helpText: 'Use `/8ball <question>?` to seek great wisdom.',
-				feature: (message, parameters)=>{
+				feature: (message, parameters) =>{
 					magic8Ball.magic8Ball(message, parameters);
 				}
 			},
 			'roll': {
 				helpText: 'Basic syntax is `/roll XdY`. This is a semi-complete implementation of the roll20 spec, you can find details of how to use more complex rolls on <https://wiki.roll20.net/Dice_Reference>',
-				feature: (message, parameters, config)=>{
-					var roll20 = new Roll20(config.roll);
+				feature: (message, parameters, config) =>{
+					let roll20 = new Roll20(config.roll);
 
 					let trailingComment = parameters.slice(1).join(' ').trim();
 
-					var rollOutput = roll20.evaluate(parameters[0]);
+					let rollOutput = roll20.evaluate(parameters[0]);
 					if (roll20.error) {
 						message.reply(roll20.errorMessage);
 					} else {
@@ -97,9 +97,9 @@ class Commands {
 
 		this._defaultHelpText = 'Fidbot currently offers a limited selection of functionality. Type `/help <command>` to find out more about them.\n' +
 			'Following commands currently supported: ' +
-			Object.keys(this._commands).filter(commandName=>{
+			Object.keys(this._commands).filter(commandName =>{
 				return !this._commands[commandName].hidden;
-			}).map(commandName=>{
+			}).map(commandName =>{
 				return '`' + commandName + '`'
 			}).join(', ');
 	}

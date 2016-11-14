@@ -17,10 +17,11 @@ class Fidbot {
 		this.commandCharacter = '/';
 		this.shitbotControllers = {};
 
-		this.client.on('ready', ()=>{
-			this.client.on('message', this._onMessage.bind(this));
+		this.client.on('ready', () =>{
 			console.log('Ready!');
 		});
+
+		this.client.on('message', this._onMessage.bind(this));
 
 		this.client.login(token).catch(console.log);
 	}
@@ -52,7 +53,7 @@ class Fidbot {
 			}
 			if (config.awoo.active) {
 				if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
-					message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message=>{
+					message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message =>{
 						message.delete(2000);
 					});
 				}
@@ -87,12 +88,12 @@ class Fidbot {
 	}
 }
 
-var getNiceTimestamp = function(date){
-	var time = date || new Date();
+let getNiceTimestamp = function(date){
+	let time = date || new Date();
 	return '' + time.getFullYear() + '/' + padToTwo(time.getMonth()) + '/' + padToTwo(time.getDate()) + ' ' + padToTwo(time.getHours()) + ':' + padToTwo(time.getMinutes()) + ':' + padToTwo(time.getSeconds());
 };
 
-var padToTwo = function(input){
+let padToTwo = function(input){
 	input = input.toString();
 	while (input.length < 2) {
 		input = '0' + input;
