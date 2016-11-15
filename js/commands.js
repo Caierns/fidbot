@@ -51,8 +51,10 @@ class Commands {
 						message.member.hasPermission('MANAGE_CHANNELS') ||
 						message.member.hasPermission('MANAGE_GUILD')) {
 						let limit = Math.max(Math.min(parameters[0], 100), 1);
-						let payload = isNaN(limit) ? undefined : {limit: limit};
-						message.channel.fetchMessages(payload).then(messages =>{
+						if (isNaN(limit)) {
+							limit = 1;
+						}
+						message.channel.fetchMessages({limit: limit}).then(messages =>{
 							messages.filter(message =>{
 								return message.author.equals(this._fidbot.client.user);
 							}).map(message =>{
