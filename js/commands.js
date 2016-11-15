@@ -44,6 +44,26 @@ class Commands {
 				helpText: 'Use `/choice <option1>;<option2>;...` to make Fidbot tell you how to live your life.',
 				feature: choice
 			},
+			'clean': {
+				helpText: 'Use `/clean <count>` to delete up to count of Fidbot\'s messages.',
+				feature: (message, parameters) =>{
+					if (message.member.hasPermission('ADMINISTRATOR') ||
+						message.member.hasPermission('MANAGE_CHANNELS') ||
+						message.member.hasPermission('MANAGE_GUILD')) {
+						let limit = Math.max(Math.min(parameters[0], 100), 1);
+						let payload = isNaN(limit) ? undefined : {limit: limit};
+						message.channel.fetchMessages(payload).then(messages =>{
+							messages.filter(message =>{
+								return message.author.equals(this._fidbot.client.user);
+							}).map(message =>{
+								message.delete().catch(console.error);
+							});
+						}).catch(console.error);
+					} else {
+						message.reply(`You do not have permission.`);
+					}
+				}
+			},
 			'conf': {
 				helpText: 'Use `/conf <feature>` to configure that feature.',
 				feature: (message, parameters, config) =>{

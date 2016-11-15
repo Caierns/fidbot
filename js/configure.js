@@ -40,6 +40,9 @@ class Configuration {
 			'choice': {
 				active: true
 			},
+			'clean': {
+				active: true
+			},
 			'conf': {
 				active: true
 			},
