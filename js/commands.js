@@ -144,7 +144,7 @@ class Commands {
 				this._commands['help'].feature(message, [commandName], config);
 			}
 		} else {
-			message.reply(`Unrecognised command!`);
+			// message.reply(`Unrecognised command!`);
 		}
 	}
 
