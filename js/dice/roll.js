@@ -77,7 +77,7 @@ class Roll {
 		if (this._explodingRange !== null) {
 			var probabilityExplosion = (this._explodingRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
 			this._theoreticalDiceCount += this._diceCount / (1 - probabilityExplosion);
-			if (this._theoreticalDiceCount > this._options.maxCount) {
+			if (isNaN(this._theoreticalDiceCount) || this._theoreticalDiceCount > this._options.maxCount) {
 				this._error = true;
 				this._errorMessage = 'Error: Due to exploding dice this input will statistically exceed the limit of ' + this._options.maxCount + ' dice rolls.';
 				return;
