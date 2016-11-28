@@ -30,35 +30,40 @@ class Fidbot {
 
 		Fidbot._log(message);
 
-		// Ignore bots
-		if (message.author.bot) {
-			return;
-		}
+		// Defer in the hopes infinite loops won't block logging
+		setImmediate(() =>{
 
-		// Ignore direct messages to the bot
-		if (!message.guild) {
-			message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
-			return;
-		}
-
-		this.getShitbotController(message).onNewMessage(message);
-
-		let config = this._getConfig(message);
-
-		if (message.content.charAt(0) === this.commandCharacter) {
-			this.commands.handle(message, message.content.slice(1).split(' '));
-		} else {
-			if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
-				message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
+			// Ignore bots
+			if (message.author.bot) {
+				return;
 			}
-			if (config.awoo.active) {
-				if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
-					message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message =>{
-						message.delete(2000);
-					});
+
+			// Ignore direct messages to the bot
+			if (!message.guild) {
+				message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
+				return;
+			}
+
+			this.getShitbotController(message).onNewMessage(message);
+
+			let config = this._getConfig(message);
+
+			if (message.content.charAt(0) === this.commandCharacter) {
+				this.commands.handle(message, message.content.slice(1).split(' '));
+			} else {
+				if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
+					message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
+				}
+				if (config.awoo.active) {
+					if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
+						message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message =>{
+							message.delete(2000);
+						});
+					}
 				}
 			}
-		}
+
+		});
 	}
 
 	getShitbotController(message){
