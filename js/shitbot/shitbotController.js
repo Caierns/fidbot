@@ -103,7 +103,7 @@ class ShitbotController {
 			this._windowSlidingPostingUsers.push(new Set());
 			this._windowSlidingMessageContent.push('');
 		}
-		if (!infiniteLoopLimiter){
+		if (!infiniteLoopLimiter) {
 			console.error('Maybe infinite loop hit in shitbotController line 99:');
 			console.error(message);
 		}
@@ -211,7 +211,7 @@ class ShitbotController {
 				shitChunks.push(shitpost.slice(0, DISCORD_MESSAGE_CHARACTER_LIMIT - 1) + '-');
 				shitpost = '-' + shitpost.slice(DISCORD_MESSAGE_CHARACTER_LIMIT - 1);
 			}
-			if (!infiniteLoopLimiter){
+			if (!infiniteLoopLimiter) {
 				console.error('Maybe infinite loop hit in shitbotController line 99:');
 				console.error(shitpost, shitChunks);
 			}

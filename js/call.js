@@ -7,8 +7,8 @@ class Call {
 
 	call(message, parameters){
 		parameters = parameters.join(' ').replace(/\n.*/g, '');
-		var splitPoint = parameters.search(/ an? /i);
-		var callName, callSlur;
+		let splitPoint = parameters.search(/ an? /i);
+		let callName, callSlur;
 		if (splitPoint > 0) {
 			callName = parameters.slice(0, splitPoint).trim();
 			callSlur = parameters.slice(splitPoint + 3).trim();
@@ -18,22 +18,22 @@ class Call {
 			if (/fidbot/i.test(callName) || callName === '<@' + this._botClient.user.id + '>') {
 				callSlur = 'wonderful creation';
 			}
-			var yellNoun = callSlur.toUpperCase();
-			var count;
+			let yellNoun = callSlur.toUpperCase();
+			let count;
 			yellNoun = yellNoun.replace(/[AEIOUＡＥＩＯＵ⛎]/g, function(letter){
 				count = 2 + Math.floor(Math.random() * 4);
-				var ret = '';
+				let ret = '';
 				for (; count > 0; count--) {
 					ret += letter;
 				}
 				return ret;
 			});
-			var trailingExclamationMarks = '';
+			let trailingExclamationMarks = '';
 			count = 1 + Math.floor(Math.random() * 3);
 			for (; count > 0; count--) {
 				trailingExclamationMarks += '!';
 			}
-			var determiner = 'a';
+			let determiner = 'a';
 			if (/[aeiou]/i.test(callSlur.charAt(0))) {
 				determiner = 'an';
 			}

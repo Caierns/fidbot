@@ -80,7 +80,7 @@ class MarkovBase {
 		let words = text.split(/\s/).filter(this._addWordFilter);
 
 		// Exit if we have nothing to work with
-		if (!words || !words.length){
+		if (!words || !words.length) {
 			return;
 		}
 
@@ -272,10 +272,10 @@ class Shitbot extends MarkovBase {
 Shitbot.base = new MarkovBase();
 
 // Seed the base with files found in the seedBase folder
-fs.readdir(SEED_PATH, (err, files)=>{
+fs.readdir(SEED_PATH, (err, files) =>{
 	if (files) {
-		files.forEach(file=>{
-			fs.readFile(path.join(SEED_PATH, file), 'utf8', (err, data)=>{
+		files.forEach(file =>{
+			fs.readFile(path.join(SEED_PATH, file), 'utf8', (err, data) =>{
 				Shitbot.base.add(data);
 			});
 		});

@@ -17,7 +17,7 @@ class Roll {
 		this._error = false; // Set a flag to indicate the input is invalid
 		this._errorMessage = '';
 
-		var matchParams = /([0-9]+)d([0-9F]+)(.*)/.exec(inputString);
+		let matchParams = /([0-9]+)d([0-9F]+)(.*)/.exec(inputString);
 		if (matchParams === null) {
 			this._error = true;
 			this._errorMessage = 'Error: invalid roll command.';
@@ -62,7 +62,7 @@ class Roll {
 		}
 
 		if (this._rerollRange !== null) {
-			var probabilityReroll = (this._rerollRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
+			let probabilityReroll = (this._rerollRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
 			this._theoreticalDiceCount += this._rerollOnce ? this._diceCount * (1 + probabilityReroll) : this._diceCount / (1 - probabilityReroll);
 			if (this._theoreticalDiceCount > this._options.maxCount) {
 				this._error = true;
@@ -76,7 +76,7 @@ class Roll {
 		}
 
 		if (this._explodingRange !== null) {
-			var probabilityExplosion = (this._explodingRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
+			let probabilityExplosion = (this._explodingRange.countIntegersInRange(1, this._diceSize)) / this._diceSize;
 			this._theoreticalDiceCount += this._diceCount / (1 - probabilityExplosion);
 			if (isNaN(this._theoreticalDiceCount) || this._theoreticalDiceCount > this._options.maxCount) {
 				this._error = true;
@@ -118,8 +118,8 @@ class Roll {
 
 	_parseMods(modString){
 		if (modString !== '') {
-			var modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
-			var matchMod;
+			let modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
+			let matchMod;
 			let infiniteLoopLimiter = 10000;
 			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '' && infiniteLoopLimiter) {
 				infiniteLoopLimiter--;
@@ -284,9 +284,9 @@ class Roll {
 	};
 
 	_totalResultsSum(){
-		var sum = 0;
-		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			var result = this._results[resultIndex];
+		let sum = 0;
+		for (let resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+			let result = this._results[resultIndex];
 			if (!result.dropped && !result.rerolled) {
 				sum += result.value;
 			}
@@ -295,9 +295,9 @@ class Roll {
 	}
 
 	_totalResultsSuccesses(){
-		var successes = 0;
-		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			var result = this._results[resultIndex];
+		let successes = 0;
+		for (let resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+			let result = this._results[resultIndex];
 			if (!result.dropped && !result.rerolled) {
 				if (this._s.isInRange(result.value)) {
 					successes++;
@@ -351,7 +351,7 @@ class Roll {
 	}
 
 	_formatResult(result){
-		var output = result;
+		let output = result;
 		if (this._cs.isInRange(result)) {
 			output = Roll._formatCriticalSuccess(output);
 		}
@@ -392,7 +392,7 @@ class Roll {
 	}
 
 	executeDice(){
-		var resultIndex, result;
+		let resultIndex, result;
 		for (resultIndex = 0; resultIndex < this._diceCount; resultIndex++) {
 			result = this._getRandomDieResult(this._results.length);
 			this._results.push(result);
@@ -428,7 +428,7 @@ class Roll {
 					result.exploded = true;
 					do {
 						infiniteLoopLimiter--;
-						var extraResultValue = this._getRandomDieInteger();
+						let extraResultValue = this._getRandomDieInteger();
 						result.addValue(extraResultValue);
 					} while (this._explodingRange.isInRange(extraResultValue) && infiniteLoopLimiter);
 					if (!infiniteLoopLimiter) {
@@ -466,7 +466,7 @@ class Roll {
 				this._results.sort(Roll._sortAscendingFunction);
 			}
 			// Mark the first dropCount results as dropped
-			var dropsRemaining = this._dropCount;
+			let dropsRemaining = this._dropCount;
 			for (resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
 				if (dropsRemaining <= 0) {
 					break;
@@ -496,10 +496,10 @@ class Roll {
 	}
 
 	toString(){
-		var outputString = '(';
-		for (var resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
-			var result = this._results[resultIndex];
-			var value = result.value;
+		let outputString = '(';
+		for (let resultIndex = 0; resultIndex < this._results.length; resultIndex++) {
+			let result = this._results[resultIndex];
+			let value = result.value;
 			if (this._isFateDice) {
 				value = _fateMapping[value];
 			}

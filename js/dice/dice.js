@@ -1,6 +1,6 @@
 'use strict';
 
-var RollExpression = require('./rollExpression.js');
+const RollExpression = require('./rollExpression.js');
 
 class Dice {
 	constructor(options){
@@ -11,7 +11,7 @@ class Dice {
 	}
 
 	evaluate(inputString){
-		var rollExpression = new RollExpression(inputString, this._options);
+		let rollExpression = new RollExpression(inputString, this._options);
 		if (rollExpression.error) {
 			this._error = rollExpression.error;
 			this._errorMessage = rollExpression.errorMessage;
@@ -19,7 +19,7 @@ class Dice {
 		}
 
 		rollExpression.executeDice();
-		var outputString = rollExpression.toString() + ' = ' + rollExpression.total;
+		let outputString = rollExpression.toString() + ' = ' + rollExpression.total;
 		if (rollExpression.isTypeSuccess) {
 			outputString += ' Successes';
 		}

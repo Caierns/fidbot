@@ -5,7 +5,7 @@ const path = require('path');
 
 const DATA_PATH = 'data';
 
-const recursiveAssign = (target, source)=>{
+const recursiveAssign = (target, source) =>{
 	for (let key in source) {
 		if (source.hasOwnProperty(key)) {
 			let isTargetValueObject = isObject(target[key]);
@@ -20,7 +20,7 @@ const recursiveAssign = (target, source)=>{
 	}
 };
 
-const isObject = (thing)=>{
+const isObject = (thing) =>{
 	return (typeof thing === 'object' ) && ( thing !== null);
 };
 

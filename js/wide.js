@@ -11,7 +11,7 @@ class Wide {
 
 	static _makeWide(inputString){
 		return inputString.replace(/./g, function($0){
-			var normalIndex = normalChars.indexOf($0);
+			let normalIndex = normalChars.indexOf($0);
 			if (normalIndex >= 0) {
 				return wideChars[normalIndex];
 			} else {

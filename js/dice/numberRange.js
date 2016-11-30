@@ -45,14 +45,14 @@ class NumberRange {
 		if (this._lowerBound < this._upperBound) {
 			return upperBound - lowerBound + 1;
 		}
-		var count = 0;
+		let count = 0;
 		if (Number.isFinite(this._upperBound)) {
 			count += this._upperBound - lowerBound + 1;
 		}
 		if (Number.isFinite(this._lowerBound)) {
 			count += upperBound - this._lowerBound + 1;
 		}
-		for (var specificEquality in this._specificEquality) {
+		for (let specificEquality in this._specificEquality) {
 			if (this._specificEquality.hasOwnProperty(specificEquality) &&
 				this._specificEquality[specificEquality] &&
 				specificEquality < this._lowerBound &&

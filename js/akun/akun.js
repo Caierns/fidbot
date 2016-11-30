@@ -16,26 +16,26 @@ class Akun {
 		if (parameters[0] === 'link') {
 			Akun.livelink(message, parameters.slice(1));
 		} else {
-			Akun._get('/api/anonkun/board/live').then(responseJson=>{
+			Akun._get('/api/anonkun/board/live').then(responseJson =>{
 				let reply = 'Akun is being screwy.';
 				if (responseJson['stories'] && Array.isArray(responseJson['stories'])) {
 					reply = Akun._storiesToTitleList(responseJson['stories']);
 				}
 				message.channel.sendMessage(reply);
-			}).catch(err=>{
+			}).catch(err =>{
 				message.reply(Akun._errorMessage(err));
 			});
 		}
 	}
 
 	static livelink(message, parameters){
-		Akun._get('/api/anonkun/board/live').then(responseJson=>{
+		Akun._get('/api/anonkun/board/live').then(responseJson =>{
 			let reply = 'Akun is being screwy.';
 			if (responseJson['stories'] && Array.isArray(responseJson['stories'])) {
 				reply = Akun._storiesToLinkList(responseJson['stories']);
 			}
 			message.channel.sendMessage(reply);
-		}).catch(err=>{
+		}).catch(err =>{
 			message.reply(Akun._errorMessage(err));
 		});
 	}
@@ -50,14 +50,14 @@ class Akun {
 	};
 
 	static _storiesToLinkList(stories){
-		return stories.map(story=>{
+		return stories.map(story =>{
 			// Wrapping links in angle brackets stops discord from previewing it
 			return '<https://' + HOSTNAME + '/stories/' + story['t'].replace(/ /g, '_').replace('<br>', '') + '/' + story['_id'] + '>';
 		}).join('\n');
 	}
 
 	static _storiesToTitleList(stories){
-		return stories.map(story=>{
+		return stories.map(story =>{
 			return story['t'].replace('<br>', '');
 		}).join(', ');
 	}
@@ -90,15 +90,15 @@ class Akun {
 	}
 
 	static _request(options, postDataString){
-		return new Promise((resolve, reject)=>{
-			let request = http.request(options, response=>{
-				var str = '';
+		return new Promise((resolve, reject) =>{
+			let request = http.request(options, response =>{
+				let str = '';
 
-				response.on('data', chunk=>{
+				response.on('data', chunk =>{
 					str += chunk;
 				});
 
-				response.on('end', ()=>{
+				response.on('end', () =>{
 					try {
 						let json = JSON.parse(str);
 						resolve(json);
@@ -108,7 +108,7 @@ class Akun {
 				});
 			});
 
-			request.on('error', e=>reject);
+			request.on('error', e => reject);
 			if (postDataString) {
 				request.write(postDataString);
 			}

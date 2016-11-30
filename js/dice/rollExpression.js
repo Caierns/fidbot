@@ -164,12 +164,12 @@ class RollGroup {
 		this._errorMessage = 'Error: grouped rolls not yet supported.';
 		return;
 
-		var rollArray = [];
-		var braceOpen = 0;
-		var lastCommaIndex = 1;
-		var splitString;
-		for (var charIndex = 1; charIndex < inputString.length; charIndex++) {
-			var char = inputString.charAt(charIndex);
+		let rollArray = [];
+		let braceOpen = 0;
+		let lastCommaIndex = 1;
+		let splitString;
+		for (let charIndex = 1; charIndex < inputString.length; charIndex++) {
+			let char = inputString.charAt(charIndex);
 			if (char === '{') {
 				braceOpen++;
 			}
@@ -188,7 +188,7 @@ class RollGroup {
 		splitString = inputString.slice(lastCommaIndex, charIndex);
 		rollArray.push(new RollExpression(splitString, this._options));
 
-		var optionsString = inputString.slice(charIndex + 1);
+		let optionsString = inputString.slice(charIndex + 1);
 
 		this._members = rollArray;
 		this._optionsString = optionsString;
@@ -198,7 +198,7 @@ class RollGroup {
 		this._errorMessage = '';
 		this._isTypeSuccess = this._members[0].isTypeSuccess;
 
-		var memberIndex, member;
+		let memberIndex, member;
 		for (memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
 			member = this._members[memberIndex];
 			if (member.error) {
@@ -231,17 +231,17 @@ class RollGroup {
 	}
 
 	executeDice(){
-		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
-			var member = this._members[memberIndex];
+		for (let memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
+			let member = this._members[memberIndex];
 			member.executeDice();
 			this._total += member.total;
 		}
 	}
 
 	toString(){
-		var outputString = '';
-		for (var memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
-			var member = this._members[memberIndex];
+		let outputString = '';
+		for (let memberIndex = 0; memberIndex < this._members.length; memberIndex++) {
+			let member = this._members[memberIndex];
 			outputString += member.toString();
 			if (memberIndex !== this._members.length - 1) {
 				outputString += '+';
