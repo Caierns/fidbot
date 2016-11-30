@@ -36,10 +36,10 @@ class ShitbotController {
 		this._postWordCount = 0;
 
 		this._saveFilePath = path.join(SEED_PATH, this._channel.id);
-		fs.readFile(this._saveFilePath, 'utf8', (err, data)=>{
+		fs.readFile(this._saveFilePath, 'utf8', (err, data) =>{
 			// Resume the old data
 			if (!err) {
-				data.split('/n').forEach(line=>{
+				data.split('/n').forEach(line =>{
 					this._shitbot.addPost(line);
 				});
 			}
@@ -54,13 +54,13 @@ class ShitbotController {
 		this._fidbot.shitbotControllers[this._channel.id] = null;
 		this._fidbot = null;
 		this._channel = null;
-		return new Promise((resolve, reject)=>{
-			this._writeStream.on('finish', (err)=>{
+		return new Promise((resolve, reject) =>{
+			this._writeStream.on('finish', (err) =>{
 				if (err) {
 					reject(err);
 				}
 				if (shouldDeleteData) {
-					fs.unlink(this._saveFilePath, (err)=>{
+					fs.unlink(this._saveFilePath, (err) =>{
 						if (err) {
 							reject(err);
 						}
@@ -76,7 +76,7 @@ class ShitbotController {
 
 	reset(){
 		this._shitbot = new Shitbot(this._fidbot.commandCharacter);
-		fs.writeFile(this._saveFilePath, '', (err)=>{
+		fs.writeFile(this._saveFilePath, '', (err) =>{
 			if (err) {
 				console.error(err);
 			}
@@ -95,11 +95,17 @@ class ShitbotController {
 		}
 
 		// Create any necessary new entries
-		while (this._endOfIntervalTimestamp <= message.createdTimestamp) {
+		let infiniteLoopLimiter = 10000;
+		while (this._endOfIntervalTimestamp <= message.createdTimestamp && infiniteLoopLimiter) {
+			infiniteLoopLimiter--;
 			this._endOfIntervalTimestamp += TIME_INTERVAL;
 			this._windowSliding.push(0);
 			this._windowSlidingPostingUsers.push(new Set());
 			this._windowSlidingMessageContent.push('');
+		}
+		if (!infiniteLoopLimiter){
+			console.error('Maybe infinite loop hit in shitbotController line 99:');
+			console.error(message);
 		}
 
 		// Update latest entry with new post information
@@ -121,7 +127,7 @@ class ShitbotController {
 
 		// If there are fixed windows then start doing stats on it
 		if (this._windowFixed.length) {
-			var statResults = ShitbotController._statTest(this._windowFixed, this._windowSliding);
+			let statResults = ShitbotController._statTest(this._windowFixed, this._windowSliding);
 			if (Math.abs(statResults) > STANDARD_DEVIATION) {
 				// Change is upon us, go wild!
 				this._windowFixed = this._windowSliding.slice();
@@ -139,14 +145,14 @@ class ShitbotController {
 		this._active = true;
 		// Figure out the average user posting rate
 		let userCount = (new Set([].concat(...this._windowSlidingPostingUsers.map(users => Array.from(users))))).size;
-		let postCount = this._windowSliding.reduce((a, b)=>{
+		let postCount = this._windowSliding.reduce((a, b) =>{
 			return a + b;
 		});
 		let perUserPostCount = postCount / userCount;
 		let totalTime = TIME_INTERVAL * WINDOW_SIZE;
 		this._postTimeInterval = totalTime / perUserPostCount;
 		// Figure out the average word count
-		let mergedPostContent = this._windowSlidingMessageContent.reduce((a, b)=>{
+		let mergedPostContent = this._windowSlidingMessageContent.reduce((a, b) =>{
 			return a + b;
 		});
 		this._postWordCount = mergedPostContent.split(/\s/).filter(word =>{
@@ -181,7 +187,7 @@ class ShitbotController {
 				abs: Math.abs(dif)
 			});
 		}
-		stats.sort((a, b)=>{
+		stats.sort((a, b) =>{
 			return a.abs - b.abs;
 		});
 		for (let i = 0; i < stats.length; i++) {
@@ -199,12 +205,18 @@ class ShitbotController {
 		if (this._active) {
 			let shitpost = this._shitbot.generatePost(this._postWordCount);
 			let shitChunks = [];
-			while (shitpost.length >= DISCORD_MESSAGE_CHARACTER_LIMIT) {
+			let infiniteLoopLimiter = 10000;
+			while (shitpost.length >= DISCORD_MESSAGE_CHARACTER_LIMIT && infiniteLoopLimiter) {
+				infiniteLoopLimiter--;
 				shitChunks.push(shitpost.slice(0, DISCORD_MESSAGE_CHARACTER_LIMIT - 1) + '-');
 				shitpost = '-' + shitpost.slice(DISCORD_MESSAGE_CHARACTER_LIMIT - 1);
 			}
+			if (!infiniteLoopLimiter){
+				console.error('Maybe infinite loop hit in shitbotController line 99:');
+				console.error(shitpost, shitChunks);
+			}
 			shitChunks.push(shitpost);
-			shitChunks.forEach(chunk=>{
+			shitChunks.forEach(chunk =>{
 				if (chunk && chunk.length) {
 					this._channel.sendMessage(chunk).catch(console.error);
 				}

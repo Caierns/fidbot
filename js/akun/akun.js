@@ -41,7 +41,8 @@ class Akun {
 	}
 
 	static dice(message, parameters){
-		message.reply(Dice.evaluate(parameters.join(' ')));
+		message.reply(`Disabled for debugging purposes, apologies.`);
+		// message.reply(Dice.evaluate(parameters.join(' ')));
 	}
 
 	static _errorMessage(err){

@@ -30,40 +30,35 @@ class Fidbot {
 
 		Fidbot._log(message);
 
-		// Defer in the hopes infinite loops won't block logging
-		setTimeout(() =>{
+		// Ignore bots
+		if (message.author.bot) {
+			return;
+		}
 
-			// Ignore bots
-			if (message.author.bot) {
-				return;
+		// Ignore direct messages to the bot
+		if (!message.guild) {
+			message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
+			return;
+		}
+
+		this.getShitbotController(message).onNewMessage(message);
+
+		let config = this._getConfig(message);
+
+		if (message.content.charAt(0) === this.commandCharacter) {
+			this.commands.handle(message, message.content.slice(1).split(' '));
+		} else {
+			if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
+				message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
 			}
-
-			// Ignore direct messages to the bot
-			if (!message.guild) {
-				message.reply('I am not presently equipped to deal with direct communication. I am sorry.');
-				return;
-			}
-
-			this.getShitbotController(message).onNewMessage(message);
-
-			let config = this._getConfig(message);
-
-			if (message.content.charAt(0) === this.commandCharacter) {
-				this.commands.handle(message, message.content.slice(1).split(' '));
-			} else {
-				if (/alerni/i.test(message.content) && /slut/i.test(message.content)) {
-					message.channel.sendMessage('A slut! A SLUUUUUUTTTTT!');
-				}
-				if (config.awoo.active) {
-					if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
-						message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message =>{
-							message.delete(2000);
-						});
-					}
+			if (config.awoo.active) {
+				if (/([^A-z]|^)a+[\s]*w+[\s]*o[\s]*o+/i.test(message.content)) {
+					message.channel.sendFile('http://i.imgur.com/f7ipWKn.jpg').then(message =>{
+						message.delete(2000);
+					});
 				}
 			}
-
-		}, 500);
+		}
 	}
 
 	getShitbotController(message){
@@ -100,8 +95,14 @@ let getNiceTimestamp = function(date){
 
 let padToTwo = function(input){
 	input = input.toString();
-	while (input.length < 2) {
+	let infiniteLoopLimiter = 10000;
+	while (input.length < 2 && infiniteLoopLimiter) {
+		infiniteLoopLimiter--;
 		input = '0' + input;
+	}
+	if (!infiniteLoopLimiter) {
+		console.error('Maybe infinite loop hit in fidbot line 103:');
+		console.error(input);
 	}
 	return input;
 };
