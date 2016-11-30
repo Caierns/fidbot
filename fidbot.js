@@ -31,7 +31,7 @@ class Fidbot {
 		Fidbot._log(message);
 
 		// Defer in the hopes infinite loops won't block logging
-		setImmediate(() =>{
+		setTimeout(() =>{
 
 			// Ignore bots
 			if (message.author.bot) {
@@ -63,7 +63,7 @@ class Fidbot {
 				}
 			}
 
-		});
+		}, 500);
 	}
 
 	getShitbotController(message){
