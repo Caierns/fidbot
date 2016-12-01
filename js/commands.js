@@ -52,7 +52,7 @@ class Commands {
 						message.member.hasPermission('MANAGE_GUILD')) {
 						let limit = Math.max(Math.min(parameters[0], 100), 1);
 						if (isNaN(limit)) {
-							limit = 1;
+							limit = 2;
 						}
 						message.channel.fetchMessages({limit: limit}).then(messages =>{
 							messages.filter(message =>{
