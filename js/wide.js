@@ -10,14 +10,17 @@ class Wide {
 	}
 
 	static _makeWide(inputString){
-		return inputString.replace(/./g, function($0){
-			let normalIndex = normalChars.indexOf($0);
-			if (normalIndex >= 0) {
-				return wideChars[normalIndex];
-			} else {
-				return $0;
-			}
-		})
+		if (inputString) {
+			return inputString.replace(/./g, function($0){
+				let normalIndex = normalChars.indexOf($0);
+				if (normalIndex >= 0) {
+					return wideChars[normalIndex];
+				} else {
+					return $0;
+				}
+			});
+		}
+		return `A wide nothing is still a nothing.`;
 	}
 }
 
