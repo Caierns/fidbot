@@ -32,6 +32,11 @@ class Roll {
 		this._theoreticalDiceCount = 0;
 		this._isFateDice = matchParams[2] === 'F';
 		this._diceSize = this._isFateDice ? 3 : parseInt(matchParams[2], 10);
+		if (!Number.isFinite(this._diceSize)){
+			this._error = true;
+			this._errorMessage = 'Error: dice size was not a finite number.';
+			return;
+		}
 
 		this._isTypeSuccess = false;
 		this._s = null;
