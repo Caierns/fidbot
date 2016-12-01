@@ -99,15 +99,20 @@ class Commands {
 			'roll': {
 				helpText: 'Basic syntax is `/roll XdY`. This is a semi-complete implementation of the roll20 spec, you can find details of how to use more complex rolls on <https://wiki.roll20.net/Dice_Reference>',
 				feature: (message, parameters, config) =>{
-					let roll20 = new Roll20(config.roll);
-
-					let trailingComment = parameters.slice(1).join(' ').trim();
-
-					let rollOutput = roll20.evaluate(parameters[0]);
-					if (roll20.error) {
-						message.reply(roll20.errorMessage);
+					if (!parameters[0]) {
+						this._commands['help'].feature(message, ['roll'], config);
 					} else {
-						message.reply(rollOutput + (trailingComment.length ? ' ' + trailingComment : ''));
+
+						let roll20 = new Roll20(config.roll);
+
+						let trailingComment = parameters.slice(1).join(' ').trim();
+
+						let rollOutput = roll20.evaluate(parameters[0]);
+						if (roll20.error) {
+							message.reply(roll20.errorMessage);
+						} else {
+							message.reply(rollOutput + (trailingComment.length ? ' ' + trailingComment : ''));
+						}
 					}
 				}
 			},
