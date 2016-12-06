@@ -3,7 +3,7 @@
 const Akun = require('./akun/akun.js');
 const Call = require('./call.js');
 const magic8Ball = require('./magic8Ball.js');
-const Roll20 = require('./dice/dice.js');
+const Roll20 = require('./dice/diceParent.js');
 const choice = require('./choice.js').choice;
 const kys = require('./kys.js').kys;
 const wide = require('./wide.js').wide;
@@ -103,16 +103,18 @@ class Commands {
 						this._commands['help'].feature(message, ['roll'], config);
 					} else {
 
-						let roll20 = new Roll20(config.roll);
+						Roll20.roll(config.roll, parameters).then((response) =>{
+							message.reply(response);
+						}).catch(console.error);
 
-						let trailingComment = parameters.slice(1).join(' ').trim();
-
-						let rollOutput = roll20.evaluate(parameters[0]);
-						if (roll20.error) {
-							message.reply(roll20.errorMessage);
-						} else {
-							message.reply(rollOutput + (trailingComment.length ? ' ' + trailingComment : ''));
-						}
+						// let trailingComment = parameters.slice(1).join(' ').trim();
+						//
+						// let rollOutput = roll20.evaluate(parameters[0]);
+						// if (roll20.error) {
+						// 	message.reply(roll20.errorMessage);
+						// } else {
+						// 	message.reply(rollOutput + (trailingComment.length ? ' ' + trailingComment : ''));
+						// }
 					}
 				}
 			},
