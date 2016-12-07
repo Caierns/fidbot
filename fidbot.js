@@ -4,7 +4,7 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const Commands = require('./js/commands.js');
 const ConfigManager = require('./js/configure.js');
-const ShitbotController = require('./js/shitbot/shitbotController');
+// const ShitbotController = require('./js/shitbot/shitbotController');
 
 const TOKEN = fs.readFileSync('./token', 'utf8').trim(); // Trim because linux
 
@@ -41,7 +41,7 @@ class Fidbot {
 			return;
 		}
 
-		this.getShitbotController(message).onNewMessage(message);
+		// this.getShitbotController(message).onNewMessage(message);
 
 		let config = this._getConfig(message);
 
@@ -61,14 +61,14 @@ class Fidbot {
 		}
 	}
 
-	getShitbotController(message){
-		if (!this.shitbotControllers[message.channel.id]) {
-			let config = this._getConfig(message);
-			let isActive = ConfigManager.arrayHasElement(config.shitbot.active, message.channel.id);
-			this.shitbotControllers[message.channel.id] = new ShitbotController(this, message, isActive);
-		}
-		return this.shitbotControllers[message.channel.id];
-	}
+	// getShitbotController(message){
+	// 	if (!this.shitbotControllers[message.channel.id]) {
+	// 		let config = this._getConfig(message);
+	// 		let isActive = ConfigManager.arrayHasElement(config.shitbot.active, message.channel.id);
+	// 		this.shitbotControllers[message.channel.id] = new ShitbotController(this, message, isActive);
+	// 	}
+	// 	return this.shitbotControllers[message.channel.id];
+	// }
 
 	static _log(message){
 		let logArray = [];

@@ -169,10 +169,10 @@ class ConfigManager {
 				config.save();
 				reply = `${friendly} deactivated.`;
 			} else if (commandName === 'shitbot' && parameters[0] === 'now') {
-				this._fidbot.getShitbotController(message).activate();
+				// this._fidbot.getShitbotController(message).activate();
 				return;
 			} else if (commandName === 'shitbot' && parameters[0] === 'reset') {
-				this._fidbot.getShitbotController(message).reset();
+				// this._fidbot.getShitbotController(message).reset();
 				reply = 'Shitbot data has been reset!';
 			} else {
 				reply = 'Please use `/configure ' + commandName + ' on` or `/configure ' + commandName + ' off` to toggle the feature!';
