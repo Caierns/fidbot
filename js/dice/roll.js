@@ -125,19 +125,13 @@ class Roll {
 		if (modString !== '') {
 			let modRegex = /((?:f|![!p]?|[kd][hl]?|ro?|s[ad]|c[sf])?)([<=>]?)([0-9]*)/g;
 			let matchMod;
-			let infiniteLoopLimiter = 10000;
-			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '' && infiniteLoopLimiter) {
-				infiniteLoopLimiter--;
+			while ((matchMod = modRegex.exec(modString)) !== null && matchMod[0] !== '') {
 				matchMod[2] = matchMod[2] || '=';
 				matchMod[3] = parseInt(matchMod[3], 10);
 				this['_mod_' + matchMod[1]](matchMod);
 				if (this.error) {
 					return;
 				}
-			}
-			if (!infiniteLoopLimiter) {
-				console.error('Maybe infinite loop hit in roll line 133:');
-				console.error(this._inputString);
 			}
 		}
 	}
@@ -402,57 +396,35 @@ class Roll {
 			result = this._getRandomDieResult(this._results.length);
 			this._results.push(result);
 
-			let infiniteLoopLimiter = 10000;
-
 			if (this._reroll && this._rerollRange.isInRange(result.value)) {
 				do {
-					infiniteLoopLimiter--;
 					result.rerolled = true;
 					result = this._getRandomDieResult(this._results.length);
 					this._results.push(result);
-				} while (!this._rerollOnce && this._rerollRange.isInRange(result.value) && infiniteLoopLimiter);
-				if (!infiniteLoopLimiter) {
-					console.error('Maybe infinite loop hit in roll line 403:');
-					console.error(this._inputString);
-				}
+				} while (!this._rerollOnce && this._rerollRange.isInRange(result.value));
 			}
 
 			if (this._exploding) {
-				while (this._explodingRange.isInRange(result.value) && infiniteLoopLimiter) {
-					infiniteLoopLimiter--;
+				while (this._explodingRange.isInRange(result.value)) {
 					result = this._getRandomDieResult(this._results.length);
 					result.exploded = true;
 					this._results.push(result);
-				}
-				if (!infiniteLoopLimiter) {
-					console.error('Maybe infinite loop hit in roll line 416:');
-					console.error(this._inputString);
 				}
 			} else if (this._explodingCompound) {
 				if (this._explodingRange.isInRange(result.value)) {
 					result.exploded = true;
 					let extraResultValue;
 					do {
-						infiniteLoopLimiter--;
 						extraResultValue = this._getRandomDieInteger();
 						result.addValue(extraResultValue);
-					} while (this._explodingRange.isInRange(extraResultValue) && infiniteLoopLimiter);
-					if (!infiniteLoopLimiter) {
-						console.error('Maybe infinite loop hit in roll line 428:');
-						console.error(this._inputString);
-					}
+					} while (this._explodingRange.isInRange(extraResultValue));
 				}
 			} else if (this._explodingPenetrating) {
-				while (this._explodingRange.isInRange(result.value) && infiniteLoopLimiter) {
-					infiniteLoopLimiter--;
+				while (this._explodingRange.isInRange(result.value)) {
 					result = this._getRandomDieResult(this._results.length);
 					result.exploded = true;
 					result.addValue(-1);
 					this._results.push(result);
-				}
-				if (!infiniteLoopLimiter) {
-					console.error('Maybe infinite loop hit in roll line 441:');
-					console.error(this._inputString);
 				}
 			}
 		}
