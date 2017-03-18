@@ -1,6 +1,6 @@
 'use strict';
 
-const http = require('http');
+const https = require('https');
 const querystring = require('querystring');
 const Dice = require('./dice.js');
 
@@ -12,57 +12,56 @@ const COOKIE = '__cfduid=d95fdab71be8cd3017fe3d6796bfed6931473093587; ' +
 	'ajs_user_id=%22C8x2fwWvtRvr4CyFm%22';
 
 class Akun {
-	static live(message, parameters){
+	static live(message, parameters) {
 		if (parameters[0] === 'link') {
 			Akun.livelink(message, parameters.slice(1));
 		} else {
-			Akun._get('/api/anonkun/board/live').then(responseJson =>{
+			Akun._get('/api/anonkun/board/live').then(responseJson => {
 				let reply = 'Akun is being screwy.';
 				if (responseJson['stories'] && Array.isArray(responseJson['stories'])) {
 					reply = Akun._storiesToTitleList(responseJson['stories']);
 				}
 				message.channel.sendMessage(reply);
-			}).catch(err =>{
+			}).catch(err => {
 				message.reply(Akun._errorMessage(err));
 			});
 		}
 	}
 
-	static livelink(message, parameters){
-		Akun._get('/api/anonkun/board/live').then(responseJson =>{
+	static livelink(message, parameters) {
+		Akun._get('/api/anonkun/board/live').then(responseJson => {
 			let reply = 'Akun is being screwy.';
 			if (responseJson['stories'] && Array.isArray(responseJson['stories'])) {
 				reply = Akun._storiesToLinkList(responseJson['stories']);
 			}
 			message.channel.sendMessage(reply);
-		}).catch(err =>{
+		}).catch(err => {
 			message.reply(Akun._errorMessage(err));
 		});
 	}
 
-	static dice(message, parameters){
-		message.reply(`Disabled for debugging purposes, apologies.`);
-		// message.reply(Dice.evaluate(parameters.join(' ')));
+	static dice(message, parameters) {
+		message.reply(Dice.evaluate(parameters.join(' ')));
 	}
 
-	static _errorMessage(err){
-		return 'Something went wrong: ' + err;
+	static _errorMessage(err) {
+		return `Something went wrong: ${err}`;
 	};
 
-	static _storiesToLinkList(stories){
-		return stories.map(story =>{
+	static _storiesToLinkList(stories) {
+		return stories.map(story => {
 			// Wrapping links in angle brackets stops discord from previewing it
-			return '<https://' + HOSTNAME + '/stories/' + story['t'].replace(/ /g, '_').replace('<br>', '') + '/' + story['_id'] + '>';
+			return `<https://${HOSTNAME}/stories/${story['t'].replace(/ /g, '_').replace('<br>', '')}/${story['_id']}>`;
 		}).join('\n');
 	}
 
-	static _storiesToTitleList(stories){
-		return stories.map(story =>{
+	static _storiesToTitleList(stories) {
+		return stories.map(story => {
 			return story['t'].replace('<br>', '');
 		}).join(', ');
 	}
 
-	static _get(path){
+	static _get(path) {
 		let options = {
 			hostname: HOSTNAME,
 			path: path,
@@ -74,7 +73,7 @@ class Akun {
 		return Akun._request(options);
 	}
 
-	static _post(path, postData){
+	static _post(path, postData) {
 		let postDataString = querystring.stringify(postData);
 		let options = {
 			hostname: HOSTNAME,
@@ -89,16 +88,16 @@ class Akun {
 		return Akun._request(options, postDataString);
 	}
 
-	static _request(options, postDataString){
-		return new Promise((resolve, reject) =>{
-			let request = http.request(options, response =>{
+	static _request(options, postDataString) {
+		return new Promise((resolve, reject) => {
+			let request = https.request(options, response => {
 				let str = '';
 
-				response.on('data', chunk =>{
+				response.on('data', chunk => {
 					str += chunk;
 				});
 
-				response.on('end', () =>{
+				response.on('end', () => {
 					try {
 						let json = JSON.parse(str);
 						resolve(json);
