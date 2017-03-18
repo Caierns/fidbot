@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/Fiddlekins/fidbot#readme",
   "dependencies": {
-    "discord.js": "^10.0.1"
+    "discord.js": "^11.0.0",
+    "erlpack": "github:hammerandchisel/erlpack",
+    "uws": "^0.12.0"
   }
 }
