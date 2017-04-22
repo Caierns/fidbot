@@ -51,7 +51,7 @@ class Akun {
 	static _storiesToLinkList(stories) {
 		return stories.map(story => {
 			// Wrapping links in angle brackets stops discord from previewing it
-			return `<https://${HOSTNAME}/stories/${story['t'].replace(/ /g, '_').replace('<br>', '')}/${story['_id']}>`;
+			return `<https://${HOSTNAME}/stories/${Akun._convertTitleToURLTitle(story['t'])}/${story['_id']}>`;
 		}).join('\n');
 	}
 
@@ -59,6 +59,10 @@ class Akun {
 		return stories.map(story => {
 			return story['t'].replace('<br>', '');
 		}).join(', ');
+	}
+
+	static _convertTitleToURLTitle(title) {
+		return title.replace(/ /g, '_').replace('<br>', '').replace(/\?/g, '');
 	}
 
 	static _get(path) {
