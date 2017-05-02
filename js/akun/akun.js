@@ -4,7 +4,7 @@ const https = require('https');
 const querystring = require('querystring');
 const Dice = require('./dice.js');
 
-const HOSTNAME = 'anonkun.com';
+const HOSTNAME = 'fiction.live';
 const COOKIE = '__cfduid=d95fdab71be8cd3017fe3d6796bfed6931473093587; ' +
 	'ajs_group_id=null; ' +
 	'ajs_anonymous_id=%222cced225-0eea-4026-b2ad-d6ff046b4d51%22; ' +
