@@ -65,6 +65,9 @@ class Configuration {
 			'awoo': {
 				active: true
 			},
+			'mwee': {
+				active: true
+			},
 			'shitbot': {
 				active: []
 			}
@@ -107,6 +110,7 @@ class Configuration {
 const COMMAND_NAME_TO_FRIENDLY_MAP = {
 	'wide': 'Ｗｉｄｅ feature',
 	'awoo': 'Awoo policing'
+	'mwee': 'Mwee policing'
 };
 
 class ConfigManager {

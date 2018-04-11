@@ -57,6 +57,12 @@ class Fidbot {
 						message.delete(2000);
 					});
 				}
+			}if (config.mwee.active) {
+				if (/([^A-z]|^)m+[\s]*w+[\s]*e[\s]*e+/i.test(message.content)) {
+					message.channel.sendFile('https://i.imgur.com/dOER0Gq.png').then(message =>{
+						message.delete(2000);
+					});
+				}
 			}
 		}
 	}
